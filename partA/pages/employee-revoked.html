@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Access Denied</title>
+	</head>
+	<body>
+		<nav id="navbar">
+			<div class="container">
+				<h1>
+					Only Customers have access to this operation - Please sign in again as a Customer or register as one
+				</h1>
+				<ul>
+					<li><a onclick='get("/main")'>Back</a></li>
+					<li>
+						<a onclick='signout("/Login")'>Login</a>
+					</li>
+				</ul>
+			</div>
+		</nav>
+		<script type="text/javascript">
+			function get(location) {
+				const queryString = window.location.search;
+				window.location.href = `${location}${queryString}`;
+			}
+
+			function signout(location) {
+				window.location.href = `${location}`;
+			}
+		</script>
+	</body>
+</html>

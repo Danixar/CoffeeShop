@@ -24,6 +24,13 @@
 						>
 					</li>
 				</ul>
+
+				<ul>
+					<li><a href="/login">Login</a></li>
+					<li>
+						<a href="/register">Register</a>
+					</li>
+				</ul>
 			</div>
 		</nav>
 
@@ -60,8 +67,8 @@
 					</p>
 					<h1>Customer Options:</h1>
 					<a href="#main">View Menu</a> <br />
-					<a href="/createorder">Create and Submit Order</a> <br />
-					<a href="/orders">Check on or Cancel a Pre-existing Order</a><br />
+					<a onclick='get("/createorder")'>Create and Submit Order</a> <br />
+					<a onclick='get("/orders")'>Check on or Cancel a Pre-existing Order</a><br />
 					<h1>Employee Options:</h1>
 					<a href="#main">Create or Modify the Menu</a><br />
 					<a href="#main">Check all Open Orders</a><br />
@@ -92,6 +99,11 @@
 			<p>Copyright &copy; 2020 Coffee Shop</p>
 		</footer>
 		<script type="text/javascript">
+			function get(location) {
+				const queryString = window.location.search;
+				window.location.href = `${location}${queryString}`;
+			}
+
 			function getMenu() {
 				let httpRequest = new XMLHttpRequest();
 				httpRequest.addEventListener('load', () => {

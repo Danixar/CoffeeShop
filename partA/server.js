@@ -16,6 +16,8 @@ const util = require('util');
 const PORT = 8080;
 const HOST = '0.0.0.0';
 
+// ######################################################################################################################################
+
 // Database Assignment with table posts
 const databaseInfo = {
 	host: 'mysql_a',
@@ -24,15 +26,9 @@ const databaseInfo = {
 	password: 'admin',
 };
 const db = mysql.createConnection(databaseInfo);
-db.connect((err) => {
-	if (err) throw err;
-	console.log(
-		`Connected to host ${databaseInfo.host} database ${databaseInfo.database} with user ${databaseInfo.user}`
-	);
-});
 const query = util.promisify(db.query).bind(db);
-
-query(`CREATE TABLE IF NOT EXISTS menu_items(
+const setupTables = async () => {
+	query(`CREATE TABLE IF NOT EXISTS menu_items(
             menu_id int NOT NULL AUTO_INCREMENT,
             name VARCHAR(50) NOT NULL,
             size VARCHAR(50) NOT NULL,
@@ -41,7 +37,7 @@ query(`CREATE TABLE IF NOT EXISTS menu_items(
             description VARCHAR(1000),
             PRIMARY KEY (menu_id)
             );`);
-query(`CREATE TABLE IF NOT EXISTS employees(
+	query(`CREATE TABLE IF NOT EXISTS employees(
             employee_id int NOT NULL AUTO_INCREMENT,
             first_name VARCHAR(50) NULL,
             last_name VARCHAR(50) NOT NULL,
@@ -50,7 +46,7 @@ query(`CREATE TABLE IF NOT EXISTS employees(
             UNIQUE (email),
             PRIMARY KEY (employee_id)
             );`);
-query(`CREATE TABLE IF NOT EXISTS customers(
+	query(`CREATE TABLE IF NOT EXISTS customers(
             customer_id int NOT NULL AUTO_INCREMENT,
             first_name VARCHAR(50) NULL,
             last_name VARCHAR(50) NOT NULL,
@@ -59,7 +55,7 @@ query(`CREATE TABLE IF NOT EXISTS customers(
             UNIQUE (email),
             PRIMARY KEY (customer_id)
             );`);
-query(`CREATE TABLE IF NOT EXISTS orders(
+	query(`CREATE TABLE IF NOT EXISTS orders(
             order_id int NOT NULL AUTO_INCREMENT,
             customer_id int NOT NULL,
             cancelled BOOLEAN default 0,
@@ -67,19 +63,29 @@ query(`CREATE TABLE IF NOT EXISTS orders(
             completed_at TIMESTAMP NULL,
             PRIMARY KEY (order_id)
             );`);
-query(`CREATE TABLE IF NOT EXISTS ordered_items(
+	query(`CREATE TABLE IF NOT EXISTS ordered_items(
             item_id int NOT NULL AUTO_INCREMENT,
             menu_id int NOT NULL,
             order_id int NOT NULL,
             quantity int NOT NULL default 1,
             PRIMARY KEY (item_id)
             );`);
-query(`CREATE TABLE IF NOT EXISTS tokens(
+	query(`CREATE TABLE IF NOT EXISTS tokens(
             token int NOT NULL AUTO_INCREMENT PRIMARY KEY,
             customer boolean NOT NULL default 1,
             user_id int NOT NULL,
             last_used timestamp NOT NULL
             );`);
+};
+db.connect((err) => {
+	if (err) throw err;
+	console.log(
+		`Connected to host ${databaseInfo.host} database ${databaseInfo.database} with user ${databaseInfo.user}`
+	);
+	setupTables();
+});
+
+// ######################################################################################################################################
 
 // Create Server app
 const app = new express();
@@ -117,17 +123,28 @@ const authentication = async (req, res, next) => {
 };
 app.use(authentication);
 
-// HTML files for testing post forms
+// ######################################################################################################################################
+
+// Main Page
 app.get('/', (req, res) => {
 	res.sendFile(path.join(__dirname, 'pages', 'index.html'));
 });
+app.get('/main', (req, res) => {
+	if (auth_id !== null) res.redirect(`/?token=${token}`);
+	else res.redirect(`/`);
+});
 
+// ######################################################################################################################################
 // Login
+
+// GET Login page
 app.get('/login', (req, res) => {
+	console.log(token, auth_id, customer);
 	if (auth_id !== null) res.redirect(`/?token=${token}`);
 	else res.sendFile(path.join(__dirname, 'pages', 'login.html'));
 });
 
+// POST Login Form
 app.post('/login', async (req, res) => {
 	const email = req.body.email;
 	const password = req.body.password;
@@ -156,12 +173,17 @@ app.post('/login', async (req, res) => {
 	}
 });
 
+// ######################################################################################################################################
 // Register
+
+// GET registration page
 app.get('/register', (req, res) => {
+	console.log(token, auth_id, customer);
 	if (auth_id !== null) res.redirect(`/?token=${token}`);
 	else res.sendFile(path.join(__dirname, 'pages', 'register.html'));
 });
 
+// POST registration form
 app.post('/register', async (req, res) => {
 	const first_name = req.body.first_name;
 	const last_name = req.body.last_name;
@@ -170,9 +192,10 @@ app.post('/register', async (req, res) => {
 	if (!last_name || !email || !password) res.status(400).send('Invalid Input Parameters');
 
 	try {
+		const userType = req.body.user == 1 ? 'customers' : 'employees';
 		const sql = first_name
-			? `INSERT INTO customers (first_name, last_name, email, password) VALUES ('${first_name}', '${last_name}', '${email}', '${password}');`
-			: `INSERT INTO customers (last_name, email, password) VALUES ('${last_name}', '${email}', '${password}');`;
+			? `INSERT INTO ${userType} (first_name, last_name, email, password) VALUES ('${first_name}', '${last_name}', '${email}', '${password}');`
+			: `INSERT INTO ${userType} (last_name, email, password) VALUES ('${last_name}', '${email}', '${password}');`;
 		await query(sql);
 		res.redirect('/login');
 	} catch (err) {
@@ -181,8 +204,10 @@ app.post('/register', async (req, res) => {
 	}
 });
 
+// ######################################################################################################################################
 // Customers
 
+// GET menu items
 app.get('/menu', async (req, res) => {
 	try {
 		const result = await query(`SELECT * FROM menu_items;`);
@@ -192,13 +217,27 @@ app.get('/menu', async (req, res) => {
 	}
 });
 
-app.get('/orders', (req, res) => {
+// GET order page
+app.get('/createorder', (req, res) => {
+	console.log(token, auth_id, customer);
 	if (auth_id === null) res.redirect(`/login?token=${token}`);
-	else red.sendFile(path.join(__dirname, 'pages', 'order.html'));
+	else if (auth_id !== null && !customer) {
+		res.redirect(`/employeerevoked?token=${token}`);
+	} else res.sendFile(path.join(__dirname, 'pages', 'new-order.html'));
 });
 
-app.post('/createorder', (req, res) => {});
+// POST a new order
+app.post('/createorder', (err, res) => {
+	const params = req.body;
+});
 
+// GET past orders
+app.get('/orders', (req, res) => {
+	if (auth_id === null) res.redirect(`/login?token=${token}`);
+	else red.sendFile(path.join(__dirname, 'pages', 'past-orders.html'));
+});
+
+// POST order
 app.post('/submitorder', async (req, res) => {
 	const items = req.body.items;
 	if (auth_id !== null && customer) {
@@ -220,9 +259,12 @@ app.post('/submitorder', async (req, res) => {
 			console.log(err);
 			res.status(500).send('Invalid Input Parameters');
 		}
+	} else if (auth_id !== null && !customer) {
+		res.send('Employees Cannot submit an order');
 	} else res.status(400).send('Failed to submit order');
 });
 
+// GET past orders
 app.get('/getorders', async (req, res) => {
 	if (auth_id) {
 		try {
@@ -239,6 +281,7 @@ app.get('/getorders', async (req, res) => {
 	} else res.status(400).send('Invalid Permission');
 });
 
+// POST check past order
 app.post('/checkorder', async (req, res) => {
 	const order_id = req.body.order_id;
 	if (auth_id) {
@@ -259,6 +302,7 @@ app.post('/checkorder', async (req, res) => {
 	} else res.status(400).send('Invalid Permission');
 });
 
+// POST Cancel past order
 app.post('/cancelorder', async (req, res) => {
 	let order_id = req.body.order_id;
 	if (auth_id) {
@@ -272,8 +316,10 @@ app.post('/cancelorder', async (req, res) => {
 	} else res.status(400).send('Invalid Permission');
 });
 
+// ######################################################################################################################################
 // Employees
 
+// POST create menu
 app.post('/createmenu', async (req, res) => {
 	if (auth_id && !customer) {
 		try {
@@ -297,6 +343,7 @@ app.post('/createmenu', async (req, res) => {
 	} else res.status(400).send('Improper access permissions');
 });
 
+// POST delete menu
 app.post('/deletemenu', async (req, res) => {
 	if (auth_id && !customer) {
 		try {
@@ -311,6 +358,7 @@ app.post('/deletemenu', async (req, res) => {
 	} else res.status(400).send('Improper access permissions');
 });
 
+// POST add menu item
 app.post('/addmenuitem', async (req, res) => {
 	const name = req.body.name;
 	const size = req.body.size;
@@ -333,6 +381,7 @@ app.post('/addmenuitem', async (req, res) => {
 	} else res.status(400).send('Improper access permissions');
 });
 
+// POST delete menu item
 app.post('/deletemenuitem', async (req, res) => {
 	const name = req.body.name;
 	const size = req.body.size;
@@ -352,6 +401,7 @@ app.post('/deletemenuitem', async (req, res) => {
 	} else res.status(400).send('Improper access permissions');
 });
 
+// GET all open orders
 app.get('/allopenorders', async (req, res) => {
 	if (auth_id && !customer) {
 		try {
@@ -366,6 +416,7 @@ app.get('/allopenorders', async (req, res) => {
 	} else res.status(400).send('Improper access permissions');
 });
 
+// GET all orders ready for pickup
 app.get('/ordersready', async (req, res) => {
 	try {
 		let resultOrders = await query(
@@ -387,6 +438,8 @@ app.get('/ordersready', async (req, res) => {
 		res.status(500).send('Failed to get orders');
 	}
 });
+
+// ######################################################################################################################################
 
 // Start Server
 const server = app.listen(PORT, HOST, () => {
