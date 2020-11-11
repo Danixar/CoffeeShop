@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Register</title>
+	</head>
+	<body>
+		<fieldset>
+			<legend>Register</legend>
+			<form action="/register" method="POST">
+				<div>
+					<label for="first_name">First Name: </label>
+					<input type="text" id="first_name" name="first_name" />
+					<br />
+					<label for="last_name">Last Name: </label>
+					<input type="text" id="last_name" name="last_name" required />
+				</div>
+				<div>
+					<label for="email">Email: </label>
+					<input type="text" name="email" id="email" required />
+				</div>
+				<div>
+					<label for="password">Password: </label>
+					<input type="password" name="password" id="password" required />
+				</div>
+				<button type="submit" id="register">Register</button>
+			</form>
+		</fieldset>
+
+		<a href="/">Cancel</a>
+		<a href="/login">Login</a>
+
+		<!-- <script type="text/javascript">
+			function register() {
+				let first_name = document.getElementById('first_name').value;
+				let last_name = document.getElementById('last_name').value;
+				let email = document.getElementById('email').value;
+				let password = document.getElementById('password').value;
+
+				if (first_name && last_name && email && password) {
+					let httprequest = new XMLHttpRequest();
+					httprequest.addEventListener('load', () => {
+						if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+						}
+					});
+
+					let url = '/register';
+					let params = `first_name=${first_name}&last_name=${last_name}&email=${email}&password=${password}`;
+					httpRequest.open('POST', url, true);
+					httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+					httpRequest.send(params);
+				} else {
+					alert('Missing Input Parameters!');
+				}
+			}
+
+			document.getElementById('register').addEventListener('click', register);
+		</script> -->
+	</body>
+</html>

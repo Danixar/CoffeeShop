@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="description" content="CMPT 353 Evangellos Wiegers" />
+		<meta name="author" content="Evan (Evangellos) Wiegers" />
+		<title>Coffee Shop</title>
+	</head>
+	<body>
+		<header id="main-header">
+			<div class="container">
+				<h1>Coffee Shop</h1>
+			</div>
+		</header>
+
+		<nav id="navbar">
+			<div class="container">
+				<ul>
+					<li><a href="tel:3065407573">(306) 540 – 7573</a></li>
+					<li>
+						<a href="http://maps.google.com/?q=91 Campus Dr, Saskatoon, SK S7N 5E8"
+							>91 Campus Dr, Saskatoon, SK S7N 5E8</a
+						>
+					</li>
+				</ul>
+			</div>
+		</nav>
+
+		<div class="clr"></div>
+
+		<div class="container">
+			<section id="main">
+				<fieldset>
+					<legend>Menu</legend>
+					<p id="menu">The menu is not available at this time.</p>
+					<p>*Taxes not included</p>
+				</fieldset>
+			</section>
+
+			<aside id="photo"></aside>
+		</div>
+
+		<section id="picture">
+			<div class="container">
+				<h1>With a long history of providing excellent coffee since 2020</h1>
+			</div>
+		</section>
+
+		<div class="container">
+			<aside id="photo"></aside>
+
+			<section id="about">
+				<fieldset>
+					<legend>About Us</legend>
+					<p>
+						Here at Coffee Shop, we're not like other coffee shops - we pride ourselves on selling you
+						overpriced coffee with Italian and French names that appear sophisticated but really don't mean
+						anything special if you actually know the languages their words come from.
+					</p>
+					<h1>Customer Options:</h1>
+					<a href="#main">View Menu</a> <br />
+					<a href="/createorder">Create and Submit Order</a> <br />
+					<a href="/orders">Check on or Cancel a Pre-existing Order</a><br />
+					<h1>Employee Options:</h1>
+					<a href="#main">Create or Modify the Menu</a><br />
+					<a href="#main">Check all Open Orders</a><br />
+					<a href="#main">Inform Customers an order is ready</a><br />
+				</fieldset>
+			</section>
+		</div>
+
+		<section id="picture">
+			<div class="container">
+				<h1>Made from only the finest coffee beans grown in the beautiful climate of North Canada</h1>
+			</div>
+		</section>
+
+		<div class="container">
+			<aside id="photo"></aside>
+
+			<section>
+				<fieldset>
+					<legend>Orders Ready for Pickup</legend>
+					<p id="readyorders"></p>
+					<a href="#main">Make an Order Now!</a>
+				</fieldset>
+			</section>
+		</div>
+
+		<footer id="main-footer">
+			<p>Copyright &copy; 2020 Coffee Shop</p>
+		</footer>
+		<script type="text/javascript">
+			function getMenu() {
+				let httpRequest = new XMLHttpRequest();
+				httpRequest.addEventListener('load', () => {
+					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+						let menu = JSON.parse(httpRequest.responseText);
+						let table = "<table border='1' id='menu-table' >";
+						if (menu.length > 0) {
+							for (item in menu) {
+								table +=
+									'<td> <td> ' +
+									menu[item].name +
+									'</td> <td>' +
+									menu[item].size +
+									'</td> <td>' +
+									'$' +
+									menu[item].price +
+									'</td> <td>' +
+									menu[item].description +
+									'</td> </tr>';
+							}
+							table += '</table>';
+							document.getElementById('menu').innerHTML = table;
+						} else {
+							document.getElementById('menu').innerHTML = 'The menu is currently empty';
+						}
+					} else {
+						console.log(httpRequest.responseText);
+						document.getElementById('menu').innerHTML = 'The menu is not available at this time.';
+					}
+				});
+
+				let url = '/menu';
+				httpRequest.open('GET', url, true);
+				httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+				httpRequest.send();
+			}
+
+			function getReadyOrders() {
+				let httpRequest = new XMLHttpRequest();
+				httpRequest.addEventListener('load', () => {
+					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+						let orders = JSON.parse(httpRequest.responseText);
+						if (orders.length > 1) {
+							let table = "<table border='1' id='menu-table' >";
+							for (order in orders) {
+								table +=
+									'<td> <td> ' +
+									orders[order].name +
+									'</td> <td>' +
+									orders[order].items +
+									'</td> </tr>';
+							}
+							table += '</table>';
+							document.getElementById('readyorders').innerHTML = table;
+						} else document.getElementById('readyorders').innerHTML = 'No available orders at this time.';
+					} else {
+						console.log(httpRequest.responseText);
+						document.getElementById('readyorders').innerHTML =
+							'Available orders are not viewable at this time.';
+					}
+					setTimeout(getReadyOrders, 10000);
+				});
+
+				let url = '/ordersready';
+				httpRequest.open('GET', url, true);
+				httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+				httpRequest.send();
+			}
+
+			getMenu();
+			getReadyOrders();
+		</script>
+	</body>
+</html>
