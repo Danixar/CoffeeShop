@@ -3,31 +3,35 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="style.css" />
 		<title>Login</title>
 	</head>
 	<body>
-		<fieldset>
-			<legend>Login</legend>
-			<form action="/login" method="POST">
-				<div>
-					<label for="email">Email: </label>
-					<input type="text" name="email" id="email" />
-				</div>
-				<div>
-					<label for="password">Password: </label>
-					<input type="password" name="password" id="password" />
-				</div>
-				<div>
-					<label for="customer">Customer: </label>
-					<input type="radio" name="user" id="customer" value="1" checked="checked" />
-					<label for="employee">Employee: </label>
-					<input type="radio" name="user" id="employee" value="0" />
-				</div>
-				<button type="submit" id="login">Login</button>
-			</form>
-		</fieldset>
-
-		<a href="/register">Don't have an account? Register</a>
+		<div class="container">
+			<section id="center">
+				<!-- <fieldset> -->
+				<h3>Login</h3>
+				<form action="/login" method="POST">
+					<div>
+						<label for="email">Email: </label>
+						<input type="text" name="email" id="email" />
+					</div>
+					<div>
+						<label for="password">Password: </label>
+						<input type="password" name="password" id="password" />
+					</div>
+					<div>
+						<label for="customer">Customer: </label>
+						<input type="radio" name="user" id="customer" value="1" checked="checked" />
+						<label for="employee">Employee: </label>
+						<input type="radio" name="user" id="employee" value="0" />
+					</div>
+					<button type="submit" id="login">Login</button>
+				</form>
+				<a href="/register">Don't have an account? Register</a>
+				<!-- </fieldset> -->
+			</section>
+		</div>
 
 		<script type="text/javascript">
 			function login() {

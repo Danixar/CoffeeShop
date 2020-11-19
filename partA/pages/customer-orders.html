@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="description" content="CMPT 353 Evangellos Wiegers" />
+        <meta name="author" content="Evan (Evangellos) Wiegers" />
+        <link rel="stylesheet" href="style.css" />
+		<title>Past Orders</title>
+	</head>
+	<body>
+		<header id="main-header">
+			<div class="container">
+				<h1>Your Orders</h1>
+			</div>
+        </header>
+
+        <nav id="navbar">
+			<div class="container">
+				<ul>
+					<li><a onclick='get("/main")'>Return to Menu</a></li>
+				</ul>
+			</div>
+        </nav>
+
+        <div class="container">
+			<section >
+				<!-- <fieldset> -->
+					<h3>Make a new Order!</h3>
+					<p id="menu">The menu is not available at this time.</p>
+					<p>*Taxes not included</p>
+				<!-- </fieldset> -->
+			</section>
+
+		<nav id="navbar">
+			<div class="container">
+				<ul>
+					<!-- <li><a onclick='get("/main")'>Cancel</a></li> -->
+					<li>
+						<a onclick='submitOrder()'>Submit new Order</a>
+					</li>
+				</ul>
+			</div>
+        </nav>
+
+        <div class="container">
+			<section >
+				<!-- <fieldset> -->
+					<h3>Past Orders</h3>
+					<p id="pastorders">You have no Past Orders</p>
+				<!-- </fieldset> -->
+			</section>
+
+		<nav id="navbar">
+			<div class="container">
+				<ul>
+					<!-- <li><a onclick='get("/main")'>Cancel</a></li> -->
+					<li>
+						<a onclick="cancelOrders()">Cancel Selected Orders</a>
+					</li>
+				</ul>
+			</div>
+        </nav>
+        
+        <div class="clr"></div>
+        
+        <script type="text/javascript">
+    		function get(location) {
+				const queryString = window.location.search;
+				window.location.href = `${location}${queryString}`;
+            }
+
+            let orderItems = [];
+            function getPastOrders() {
+                let httpRequest = new XMLHttpRequest();
+                httpRequest.addEventListener('load', () => {
+                    if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+                        let orders = JSON.parse(httpRequest.responseText);
+                        let table = "<table border='1' id='menu-table' >";
+                        if (orders.length > 0) {
+                            for (order in orders) {
+                                let httpRequest2 = new XMLHttpRequest();
+                                if (!orderItems.indexOf(orders[order].order_id) >= 0) orderItems.push(orders[order].order_id);
+                                httpRequest2.addEventListener('load', () => {
+                                    if (httpRequest2.readyState == 4 && httpRequest2.status == 200) {
+                                        let thisOrder = JSON.parse(httpRequest2.responseText);
+                                        table +=
+                                            '<td> <td> ' +
+                                            `<input type="checkbox" id="${thisOrder.order_id}" name="${thisOrder.order_id}" value="${thisOrder.order_id}">` +
+                                            '</td> <td>' +
+                                            `${thisOrder.finished ? 'Completed' : 'In Progress'}` +
+                                            '<td> <td> ' +
+                                            `${thisOrder.cancelled ? 'Cancelled' : ''}` +
+                                            '<td> <td> ' +
+                                            'Creation Time: ' + thisOrder.created +
+                                            '</td> <td>' +
+                                            'Cost: ' + thisOrder.cost +
+                                            '</td> <td>' +
+                                            thisOrder.items +
+                                            '</td> </tr>';
+                                            updateTable(table);
+                                    }
+                                })
+                                let url = '/checkorder';
+                                let params = `order_id=${orders[order].order_id}`;
+                                httpRequest2.open('POST', url, true);
+                                httpRequest2.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                                httpRequest2.send(params);
+                            }                       
+                        } else {
+                            document.getElementById('pastorders').innerHTML = 'You have no Past Orders';
+                        }
+                    } else {
+                        console.log(httpRequest.responseText);
+                        document.getElementById('pastorders').innerHTML = 'Past Orders cannot be seen at this time.';
+                    }
+                });
+                let url = '/getorders';
+                httpRequest.open('GET', url, true);
+                httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                httpRequest.send();
+            }
+
+            function updateTable(table) {
+                table += '</table>';     
+                document.getElementById('pastorders').innerHTML = table;
+            }
+
+            function cancelOrders() {
+                let httpRequest = new XMLHttpRequest();
+                httpRequest.addEventListener('load', () => {
+                    if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+                        alert('Orders Cancelled');
+                        getPastOrders();
+                    } else alert(httpRequest.responseText);
+                });
+                for (item in orderItems) {
+                    if (document.getElementById(orderItems[item]).checked == true) {
+                        params = `order_id=${orderItems[item]}`
+                        let url = '/cancelorder';
+                        httpRequest.open('POST', url, true);
+                        httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                        httpRequest.send(params);
+                    }
+                }
+            }
+            
+            let menuItems = [];
+            function getMenu() {
+                let httpRequest = new XMLHttpRequest();
+                httpRequest.addEventListener('load', () => {
+                    if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+                        let menu = JSON.parse(httpRequest.responseText);
+                        let table = "<table border='1' id='menu-table' >";
+                        if (menu.length > 0) {
+                            for (item in menu) {
+                                if (!menuItems.indexOf(menu[item].menu_id) >= 0) menuItems.push(menu[item].menu_id);
+                                table +=
+                                    '<td> <td> ' +
+                                    `<input type="checkbox" id="${menu[item].menu_id}" name="${menu[item].menu_id}" value="${menu[item].menu_id}">` +
+                                    '<td> <td> ' +
+                                    menu[item].name +
+                                    '</td> <td>' +
+                                    menu[item].size +
+                                    '</td> <td>' +
+                                    '$' +
+                                    menu[item].price +
+                                    '</td> <td>' +
+                                    menu[item].description +
+                                    '</td> </tr>';
+                            }
+                            table += '</table>';
+                            document.getElementById('menu').innerHTML = table;
+                        } else {
+                            document.getElementById('menu').innerHTML = 'The menu is currently empty';
+                        }
+                    } else {
+                        document.getElementById('menu').innerHTML = 'The menu is not available at this time.';
+                    }
+                });
+
+                let url = '/menu';
+                httpRequest.open('GET', url, true);
+                httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                httpRequest.send();
+            }
+
+            function submitOrder() {
+                let httpRequest = new XMLHttpRequest();
+                httpRequest.addEventListener('load', () => {
+                    if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+                        alert('Order Submitted');
+                        getPastOrders();
+                    } else alert(httpRequest.responseText);
+                });
+                params = ``;
+                for (item in menuItems) {
+                    if (document.getElementById(menuItems[item]).checked == true) params += `&${menuItems[item]}=${menuItems[item]}`
+                }
+                if (params.length > 1) {
+                    let url = '/submitorder';
+                    params = params.substring(1);
+                    httpRequest.open('POST', url, true);
+                    httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                    httpRequest.send(params);
+                } else alert('Please select an item to order!');
+            }
+
+            getPastOrders();
+            getMenu();
+        </script>
+	</body>
+</html>

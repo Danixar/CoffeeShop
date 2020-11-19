@@ -5,6 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="description" content="CMPT 353 Evangellos Wiegers" />
 		<meta name="author" content="Evan (Evangellos) Wiegers" />
+		<link rel="stylesheet" href="style.css" />
 		<title>Coffee Shop</title>
 	</head>
 	<body>
@@ -37,15 +38,26 @@
 		<div class="clr"></div>
 
 		<div class="container">
-			<section id="main">
-				<fieldset>
-					<legend>Menu</legend>
-					<p id="menu">The menu is not available at this time.</p>
-					<p>*Taxes not included</p>
-				</fieldset>
-			</section>
+			<!-- <aside id="photo"></aside> -->
 
-			<aside id="photo"></aside>
+			<section id="about">
+				<!-- <fieldset> -->
+				<h1>About Us</h1>
+				<p>
+					Here at Coffee Shop, we're not like other coffee shops - we pride ourselves on selling you
+					overpriced coffee with Italian and French names that appear sophisticated but really don't mean
+					anything special if you actually know the languages their words come from.
+				</p>
+				<h2>Customer Options:</h2>
+				<a href="#main">View Menu</a> <br />
+				<a href="#main" onclick='get("/customerorders")'>Create an Order or Check/Cancel a preexisiting one</a>
+				<br />
+				<h2>Employee Options:</h2>
+				<a href="#main">Create or Modify the Menu</a><br />
+				<a href="#main">Check all Open Orders</a><br />
+				<a href="#main">Inform Customers an order is ready</a><br />
+				<!-- </fieldset> -->
+			</section>
 		</div>
 
 		<section id="picture">
@@ -55,43 +67,32 @@
 		</section>
 
 		<div class="container">
-			<aside id="photo"></aside>
-
-			<section id="about">
-				<fieldset>
-					<legend>About Us</legend>
-					<p>
-						Here at Coffee Shop, we're not like other coffee shops - we pride ourselves on selling you
-						overpriced coffee with Italian and French names that appear sophisticated but really don't mean
-						anything special if you actually know the languages their words come from.
-					</p>
-					<h1>Customer Options:</h1>
-					<a href="#main">View Menu</a> <br />
-					<a onclick='get("/createorder")'>Create and Submit Order</a> <br />
-					<a onclick='get("/orders")'>Check on or Cancel a Pre-existing Order</a><br />
-					<h1>Employee Options:</h1>
-					<a href="#main">Create or Modify the Menu</a><br />
-					<a href="#main">Check all Open Orders</a><br />
-					<a href="#main">Inform Customers an order is ready</a><br />
-				</fieldset>
+			<section id="main">
+				<!-- <fieldset> -->
+				<h1>Menu</h1>
+				<p id="menu">The menu is not available at this time.</p>
+				<p>*Taxes not included</p>
+				<!-- </fieldset> -->
 			</section>
+
+			<!-- <aside id="photo"></aside> -->
 		</div>
 
-		<section id="picture">
+		<section id="picture2">
 			<div class="container">
 				<h1>Made from only the finest coffee beans grown in the beautiful climate of North Canada</h1>
 			</div>
 		</section>
 
 		<div class="container">
-			<aside id="photo"></aside>
+			<!-- <aside id="photo"></aside> -->
 
 			<section>
-				<fieldset>
-					<legend>Orders Ready for Pickup</legend>
-					<p id="readyorders"></p>
-					<a href="#main">Make an Order Now!</a>
-				</fieldset>
+				<!-- <fieldset> -->
+				<h1>Orders Ready for Pickup</h1>
+				<p id="readyorders"></p>
+				<a href="#main">Make an Order Now!</a>
+				<!-- </fieldset> -->
 			</section>
 		</div>
 

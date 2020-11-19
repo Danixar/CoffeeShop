@@ -67,7 +67,6 @@ const setupTables = async () => {
             item_id int NOT NULL AUTO_INCREMENT,
             menu_id int NOT NULL,
             order_id int NOT NULL,
-            quantity int NOT NULL default 1,
             PRIMARY KEY (item_id)
             );`);
 	query(`CREATE TABLE IF NOT EXISTS tokens(
@@ -101,6 +100,8 @@ let token = null;
 let auth_id = null;
 let customer = null;
 const authentication = async (req, res, next) => {
+	console.log(req.query);
+	// if (!token) token = req.query.token;
 	token = req.query.token;
 	if (token) {
 		try {
@@ -127,6 +128,8 @@ app.use(authentication);
 
 // Main Page
 app.get('/', (req, res) => {
+	console.log(token, auth_id, customer);
+	if (auth_id !== null) res.redirect(`/?token=${token}`);
 	res.sendFile(path.join(__dirname, 'pages', 'index.html'));
 });
 app.get('/main', (req, res) => {
@@ -166,6 +169,9 @@ app.post('/login', async (req, res) => {
 		const resultTokens = await query(
 			`SELECT * FROM tokens WHERE user_id = ${id} and minute(last_used) = minute(curtime());`
 		);
+		// auth_id = resultTokens[0].user_id;
+		// customer = resultTokens[0].customer;
+
 		res.redirect(`/?token=${resultTokens[0].token}`);
 	} catch (err) {
 		console.log(err);
@@ -218,17 +224,17 @@ app.get('/menu', async (req, res) => {
 });
 
 // GET order page
-app.get('/createorder', (req, res) => {
+app.get('/customerorders', (req, res) => {
 	console.log(token, auth_id, customer);
 	if (auth_id === null) res.redirect(`/login?token=${token}`);
 	else if (auth_id !== null && !customer) {
 		res.redirect(`/employeerevoked?token=${token}`);
-	} else res.sendFile(path.join(__dirname, 'pages', 'new-order.html'));
+	} else res.sendFile(path.join(__dirname, 'pages', 'customer-orders.html'));
 });
 
 // POST a new order
 app.post('/createorder', (err, res) => {
-	const params = req.body;
+	const items = req.body;
 });
 
 // GET past orders
@@ -239,22 +245,37 @@ app.get('/orders', (req, res) => {
 
 // POST order
 app.post('/submitorder', async (req, res) => {
-	const items = req.body.items;
+	const items = Object.values(req.body);
+	console.log(token, auth_id, customer);
 	if (auth_id !== null && customer) {
 		try {
 			await query(`INSERT INTO orders(customer_id, created_at) VALUES (${auth_id}, now());`);
 
-			const result = await query(`SELECT * FROM orders WHERE minute(created_at) = minute(curtime());`);
+			const result = await query(
+				`SELECT * FROM orders WHERE minute(created_at) = minute(curtime()) and customer_id=${auth_id};`
+			);
 
+			let timeMinutes = 0;
 			await Promise.all(
 				items.map(async (item) => {
 					await query(
-						`INSERT INTO ordered_items(menu_id, order_id, quantity) VALUES (${item.menu_item.id}, ${result[0].order_id}, ${item.quantity});`
+						`INSERT INTO ordered_items(menu_id, order_id) VALUES (${item}, ${result[0].order_id});`
 					);
+
+					const menu_item = await query(`SELECT * FROM menu_items WHERE menu_id=${item};`);
+					console.log(menu_item[0].time_required);
+					if (menu_item[0].time_required > 0) timeMinutes = menu_item[0].time_required;
 				})
 			);
 
-			red.send('Completed');
+			console.log(timeMinutes);
+			await query(
+				`UPDATE orders SET completed_at=ADDTIME(now(), "${
+					timeMinutes * 100
+				}") WHERE minute(created_at) = minute(curtime()) and customer_id=${auth_id};`
+			);
+
+			res.send('Completed');
 		} catch (err) {
 			console.log(err);
 			res.status(500).send('Invalid Input Parameters');
@@ -269,8 +290,8 @@ app.get('/getorders', async (req, res) => {
 	if (auth_id) {
 		try {
 			const sql = customer
-				? `SELECT * FROM orders WHERE customer_id = ${auth_id} ORDER BY DESC created_at;`
-				: `SELECT * FROM orders WHERE completed_at <= now() ORDER BY ESC created_at;`;
+				? `SELECT * FROM orders WHERE customer_id = ${auth_id} ORDER BY created_at DESC;`
+				: `SELECT * FROM orders WHERE completed_at <= now() ORDER BY created_at ESC;`;
 			const result = await query(sql);
 
 			res.send(result);
@@ -288,11 +309,22 @@ app.post('/checkorder', async (req, res) => {
 		try {
 			const result = await query(`SELECT * FROM orders WHERE order_id = ${order_id};`);
 			const resultItems = await query(`SELECT * FROM ordered_items WHERE order_id = ${order_id};`);
+			const items = await Promise.all(
+				resultItems.map(async (item) => {
+					const itemCheck = await query(`SELECT * FROM menu_items WHERE menu_id=${item.menu_id};`);
+					return itemCheck[0];
+				})
+			);
 			const order = {
-				completed: new Date(result[0].completed_at < new Date()),
-				cancelled: result[0].cancelled,
-				cost: resultItems.reduce((acc, cur) => acc + cur.price),
-				items: resultItems,
+				order_id: order_id,
+				finished: result[0].completed_at < new Date() || result[0].cancelled == 1,
+				created: result[0].created_at,
+				cancelled: result[0].cancelled == 1,
+				cost: items
+					.map((item) => item.price)
+					.reduce((acc, cur) => acc * 1.15 + cur)
+					.toFixed(2),
+				items: items.map((item) => item.name),
 			};
 			res.send(order);
 		} catch (err) {
@@ -429,7 +461,7 @@ app.get('/ordersready', async (req, res) => {
 				let customers = await query(`SELECT * FROM customers WHERE customer_id = ${order.customer_id};`);
 				let name = customers[0].last_name;
 				let items = await query(`SELECT * FROM ordered_items WHERE customer_id = ${order.customer_id};`);
-				return { name: name, items: items.map((item) => `${item.quantity} ${item.name} ${item.size}`) };
+				return { name: name, items: items.map((item) => `${item.name} ${item.size}`) };
 			})
 		);
 		res.send(orders);
