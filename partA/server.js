@@ -67,6 +67,7 @@ const setupTables = async () => {
             item_id int NOT NULL AUTO_INCREMENT,
             menu_id int NOT NULL,
             order_id int NOT NULL,
+            quantity int NOT NULL default 1,
             PRIMARY KEY (item_id)
             );`);
 	query(`CREATE TABLE IF NOT EXISTS tokens(
@@ -232,10 +233,10 @@ app.get('/customerorders', (req, res) => {
 	} else res.sendFile(path.join(__dirname, 'pages', 'customer-orders.html'));
 });
 
-// POST a new order
-app.post('/createorder', (err, res) => {
-	const items = req.body;
-});
+// // POST a new order
+// app.post('/createorder', (err, res) => {
+// 	const items = req.body;
+// });
 
 // GET past orders
 app.get('/orders', (req, res) => {
@@ -243,7 +244,7 @@ app.get('/orders', (req, res) => {
 	else red.sendFile(path.join(__dirname, 'pages', 'past-orders.html'));
 });
 
-// POST order
+// POST new order
 app.post('/submitorder', async (req, res) => {
 	const items = Object.values(req.body);
 	console.log(token, auth_id, customer);
@@ -258,17 +259,18 @@ app.post('/submitorder', async (req, res) => {
 			let timeMinutes = 0;
 			await Promise.all(
 				items.map(async (item) => {
+					let itemName = item.split('_')[0];
+					let quantity = item.split('_')[1];
 					await query(
-						`INSERT INTO ordered_items(menu_id, order_id) VALUES (${item}, ${result[0].order_id});`
+						`INSERT INTO ordered_items(menu_id, order_id, quantity) VALUES (${itemName}, ${result[0].order_id}, ${quantity});`
 					);
 
-					const menu_item = await query(`SELECT * FROM menu_items WHERE menu_id=${item};`);
+					const menu_item = await query(`SELECT * FROM menu_items WHERE menu_id=${itemName};`);
 					console.log(menu_item[0].time_required);
 					if (menu_item[0].time_required > 0) timeMinutes = menu_item[0].time_required;
 				})
 			);
 
-			console.log(timeMinutes);
 			await query(
 				`UPDATE orders SET completed_at=ADDTIME(now(), "${
 					timeMinutes * 100
@@ -285,6 +287,32 @@ app.post('/submitorder', async (req, res) => {
 	} else res.status(400).send('Failed to submit order');
 });
 
+const check = async (order_id) => {
+	const result = await query(`SELECT * FROM orders WHERE order_id = ${order_id};`);
+	const resultItems = await query(`SELECT * FROM ordered_items WHERE order_id = ${order_id};`);
+	const items = await Promise.all(
+		resultItems.map(async (item) => {
+			let itemCheck = await query(`SELECT * FROM menu_items WHERE menu_id=${item.menu_id};`);
+			let firstItem = itemCheck[0];
+			firstItem['quantity'] = item.quantity;
+			return firstItem;
+		})
+	);
+	const order = {
+		order_id: order_id,
+		finished: result[0].completed_at < new Date() || result[0].cancelled == 1,
+		created: result[0].created_at,
+		cancelled: result[0].cancelled == 1,
+		cost: items
+			.map((item) => item.price * item.quantity)
+			.reduce((acc, cur) => acc * 1.15 + cur)
+			.toFixed(2),
+		items: items.map((item) => ' ' + item.quantity + ' ' + item.name),
+	};
+
+	return order;
+};
+
 // GET past orders
 app.get('/getorders', async (req, res) => {
 	if (auth_id) {
@@ -293,8 +321,9 @@ app.get('/getorders', async (req, res) => {
 				? `SELECT * FROM orders WHERE customer_id = ${auth_id} ORDER BY created_at DESC;`
 				: `SELECT * FROM orders WHERE completed_at <= now() ORDER BY created_at ESC;`;
 			const result = await query(sql);
+			const items = await Promise.all(result.map(async (item) => await check(item.order_id)));
 
-			res.send(result);
+			res.send(items);
 		} catch (err) {
 			console.log(err);
 			res.status(500).send('Failed to get orders');
@@ -307,25 +336,7 @@ app.post('/checkorder', async (req, res) => {
 	const order_id = req.body.order_id;
 	if (auth_id) {
 		try {
-			const result = await query(`SELECT * FROM orders WHERE order_id = ${order_id};`);
-			const resultItems = await query(`SELECT * FROM ordered_items WHERE order_id = ${order_id};`);
-			const items = await Promise.all(
-				resultItems.map(async (item) => {
-					const itemCheck = await query(`SELECT * FROM menu_items WHERE menu_id=${item.menu_id};`);
-					return itemCheck[0];
-				})
-			);
-			const order = {
-				order_id: order_id,
-				finished: result[0].completed_at < new Date() || result[0].cancelled == 1,
-				created: result[0].created_at,
-				cancelled: result[0].cancelled == 1,
-				cost: items
-					.map((item) => item.price)
-					.reduce((acc, cur) => acc * 1.15 + cur)
-					.toFixed(2),
-				items: items.map((item) => item.name),
-			};
+			const order = await check(order_id);
 			res.send(order);
 		} catch (err) {
 			console.log(err);

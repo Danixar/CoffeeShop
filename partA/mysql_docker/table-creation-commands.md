@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS ordered_items(
      item_id int NOT NULL AUTO_INCREMENT,
      menu_id int NOT NULL,
      order_id int NOT NULL,
+     quantity int NOT NULL default 1,
      PRIMARY KEY (item_id)
      );
 ```
