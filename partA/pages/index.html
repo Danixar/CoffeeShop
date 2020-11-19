@@ -38,10 +38,7 @@
 		<div class="clr"></div>
 
 		<div class="container">
-			<!-- <aside id="photo"></aside> -->
-
 			<section id="about">
-				<!-- <fieldset> -->
 				<h1>About Us</h1>
 				<p>
 					Here at Coffee Shop, we're not like other coffee shops - we pride ourselves on selling you
@@ -53,10 +50,7 @@
 				<a href="#main" onclick='get("/customerorders")'>Create an Order or Check/Cancel a preexisiting one</a>
 				<br />
 				<h2>Employee Options:</h2>
-				<a href="#main">Create or Modify the Menu</a><br />
-				<a href="#main">Check all Open Orders</a><br />
-				<a href="#main">Inform Customers an order is ready</a><br />
-				<!-- </fieldset> -->
+				<a href="#main" onclick='get("employeeportal")'>Employee Portal</a><br />
 			</section>
 		</div>
 
@@ -68,14 +62,10 @@
 
 		<div class="container">
 			<section id="main">
-				<!-- <fieldset> -->
 				<h1>Menu</h1>
 				<p id="menu">The menu is not available at this time.</p>
 				<p>*Taxes not included</p>
-				<!-- </fieldset> -->
 			</section>
-
-			<!-- <aside id="photo"></aside> -->
 		</div>
 
 		<section id="picture2">
@@ -85,14 +75,10 @@
 		</section>
 
 		<div class="container">
-			<!-- <aside id="photo"></aside> -->
-
 			<section>
-				<!-- <fieldset> -->
 				<h1>Orders Ready for Pickup</h1>
 				<p id="readyorders"></p>
 				<a href="#main">Make an Order Now!</a>
-				<!-- </fieldset> -->
 			</section>
 		</div>
 
@@ -169,6 +155,51 @@
 				});
 
 				let url = '/ordersready';
+				httpRequest.open('GET', url, true);
+				httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+				httpRequest.send();
+			}
+
+			let orderItems = [];
+			function getPastOrders() {
+				orderItems = [];
+				let httpRequest = new XMLHttpRequest();
+				httpRequest.addEventListener('load', () => {
+					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+						let orders = JSON.parse(httpRequest.responseText);
+						let table = "<table border='1' id='menu-table' >";
+						if (orders.length > 0) {
+							for (order in orders) {
+								if (!orderItems.indexOf(orders[order].order_id) >= 0)
+									orderItems.push(orders[order].order_id);
+								table +=
+									'<td> <td> ' +
+									`<input type="checkbox" id="order_${orders[order].order_id}" name="order_${orders[order].order_id}" value="order_${orders[order].order_id}">` +
+									'</td> <td>' +
+									`${orders[order].finished ? 'Completed' : 'In Progress'}` +
+									'<td> <td> ' +
+									`${orders[order].cancelled ? 'Cancelled' : ''}` +
+									'<td> <td> ' +
+									'Creation Time: ' +
+									orders[order].created +
+									'</td> <td>' +
+									'Cost: ' +
+									orders[order].cost +
+									'</td> <td>' +
+									orders[order].items +
+									'</td> </tr>';
+							}
+							table += '</table>';
+							document.getElementById('pastorders').innerHTML = table;
+						} else {
+							document.getElementById('pastorders').innerHTML = 'You have no Past Orders';
+						}
+					} else {
+						console.log(httpRequest.responseText);
+						document.getElementById('pastorders').innerHTML = 'Past Orders cannot be seen at this time.';
+					}
+				});
+				let url = '/getorders';
 				httpRequest.open('GET', url, true);
 				httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 				httpRequest.send();

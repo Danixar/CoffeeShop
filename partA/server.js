@@ -233,10 +233,9 @@ app.get('/customerorders', (req, res) => {
 	} else res.sendFile(path.join(__dirname, 'pages', 'customer-orders.html'));
 });
 
-// // POST a new order
-// app.post('/createorder', (err, res) => {
-// 	const items = req.body;
-// });
+app.get('/employeerevoked', async (req, res) => {
+	res.sendFile(path.join(__dirname, 'pages', 'employee-revoked.html'));
+});
 
 // GET past orders
 app.get('/orders', (req, res) => {
@@ -362,6 +361,19 @@ app.post('/cancelorder', async (req, res) => {
 // ######################################################################################################################################
 // Employees
 
+// GET employee portal
+app.get('/employeeportal', async (req, res) => {
+	console.log(token, auth_id, customer);
+	if (auth_id === null) res.redirect(`/login?token=${token}`);
+	else if (auth_id !== null && customer) {
+		res.redirect(`/customerrevoked?token=${token}`);
+	} else res.sendFile(path.join(__dirname, 'pages', 'employee-portal.html'));
+});
+
+app.get('/customerrevoked', async (req, res) => {
+	res.sendFile(path.join(__dirname, 'pages', 'customer-revoked.html'));
+});
+
 // POST create menu
 app.post('/createmenu', async (req, res) => {
 	if (auth_id && !customer) {
@@ -451,7 +463,8 @@ app.get('/allopenorders', async (req, res) => {
 			const result = await query(
 				`SELECT * FROM orders WHERE completed_at > now() and cancelled = 0 ORDER BY created_at ESC;`
 			);
-			res.send(result);
+			const orders = await Promise.all(result.map(async (item) => await check(item.order_id)));
+			res.send(orders);
 		} catch (err) {
 			console.log(err);
 			res.status(500).send('Failed to get orders');
@@ -459,14 +472,35 @@ app.get('/allopenorders', async (req, res) => {
 	} else res.status(400).send('Improper access permissions');
 });
 
+// GET all completed orders
+app.get('/allcompletedorders', async (req, res) => {
+	if (auth_id && !customer) {
+		try {
+			const result = await query(
+				`SELECT * FROM orders WHERE completed_at < now() and cancelled = 0 ORDER BY created_at ESC;`
+			);
+			const orders = await Promise.all(result.map(async (item) => await check(item.order_id)));
+			res.send(orders);
+		} catch (err) {
+			console.log(err);
+			res.status(500).send('Failed to get orders');
+		}
+	} else res.status(400).send('Improper access permissions');
+});
+
+// POST order ready for pickup
+app.post('/ordersready', async (req, res) => {});
+
 // GET all orders ready for pickup
 app.get('/ordersready', async (req, res) => {
 	try {
-		let resultOrders = await query(
+		const resultOrders = await query(
 			`SELECT * FROM orders WHERE completed_at <= now() and cancelled = 0 ORDER BY created_at;`
 		);
 
-		let orders = await Promise.all(
+		const items = await Promise.all(resultOrders.map(async (item) => await check(item.order_id)));
+
+		const orders = await Promise.all(
 			resultOrders.map(async (order) => {
 				console.log(order);
 				let customers = await query(`SELECT * FROM customers WHERE customer_id = ${order.customer_id};`);
