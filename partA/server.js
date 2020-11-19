@@ -153,6 +153,7 @@ app.post('/login', async (req, res) => {
 	const email = req.body.email;
 	const password = req.body.password;
 	const userType = req.body.user;
+	console.log(email, password, userType);
 	if (!email || !password) res.sendFile(path.join(__dirname, 'pages', 'login.html'));
 
 	try {
@@ -164,7 +165,7 @@ app.post('/login', async (req, res) => {
 				: `SELECT * FROM employees WHERE email = '${email}' and password = '${password}';`
 		);
 
-		const id = customer ? resultUsers[0].customer_id : resultUsers[0].user_id;
+		const id = customer ? resultUsers[0].customer_id : resultUsers[0].employee_id;
 		await query(`INSERT INTO tokens(customer, user_id, last_used) VALUES(${userType}, ${id}, now());`);
 
 		const resultTokens = await query(
@@ -209,6 +210,15 @@ app.post('/register', async (req, res) => {
 		console.log(err);
 		res.sendFile(path.join(__dirname, 'pages', 'register.html'));
 	}
+});
+
+// ######################################################################################################################################
+// Sign Out
+app.get('/signout', (req, res) => {
+	token = null;
+	auth_id = null;
+	customer = null;
+	res.redirect('/login');
 });
 
 // ######################################################################################################################################

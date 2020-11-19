@@ -8,5 +8,63 @@
 		<link rel="stylesheet" href="style.css" />
 		<title>Employee Portal</title>
 	</head>
-	<body></body>
+	<body>
+        <header id="main-header">
+			<div class="container">
+				<h1>Employee Portal</h1>
+			</div>
+        </header>
+
+        <nav id="navbar">
+			<div class="container">
+				<ul>
+					<li><a href="#navbar" onclick='get("/main")'>Return to Menu</a></li>
+				</ul>
+			</div>
+        </nav>
+
+        <div class="container">
+            <div>
+                <section >
+                        <h3>Menu</h3>
+                        <p id="menu">The menu is not available at this time.</p>
+                        <p>*Taxes not included</p>
+                </section>
+
+            <nav class="sectionEnd">
+                <div class="container">
+                    <ul>
+                        <li>
+                            <a onclick='submitOrder()'>Submit new Order</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <div>
+                <section >
+                        <h3>Past Orders</h3>
+                        <p id="pastorders">You have no Past Orders</p>
+                </section>
+
+            <nav class="sectionEnd">
+                <div class="container">
+                    <ul>
+                        <li>
+                            <a onclick="cancelOrders()">Cancel Selected Orders</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        
+        <div class="clr"></div>
+
+        <script type="text/javascript">
+            function get(location) {
+                const queryString = window.location.search;
+                window.location.href = `${location}${queryString}`;
+            }
+        </script>
+    </body>
 </html>
