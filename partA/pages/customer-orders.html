@@ -78,7 +78,6 @@
                     if (httpRequest.readyState == 4 && httpRequest.status == 200) {
                         let orders = JSON.parse(httpRequest.responseText);
                         let table = "<table border='1' id='menu-table' >";
-                        console.log(orders);
                         if (orders.length > 0) {
                             for (order in orders) {
                                 if (!orderItems.indexOf(orders[order].order_id) >= 0) orderItems.push(orders[order].order_id);
