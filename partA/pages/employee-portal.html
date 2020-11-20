@@ -9,62 +9,251 @@
 		<title>Employee Portal</title>
 	</head>
 	<body>
-        <header id="main-header">
+		<header id="main-header">
 			<div class="container">
 				<h1>Employee Portal</h1>
 			</div>
-        </header>
+		</header>
 
-        <nav id="navbar">
+		<nav id="navbar">
 			<div class="container">
 				<ul>
 					<li><a href="#navbar" onclick='get("/main")'>Return to Menu</a></li>
 				</ul>
 			</div>
-        </nav>
+		</nav>
 
-        <div class="container">
-            <div>
-                <section >
-                        <h3>Menu</h3>
-                        <p id="menu">The menu is not available at this time.</p>
-                        <p>*Taxes not included</p>
-                </section>
+		<div class="container">
+			<section>
+				<h3>Menu</h3>
+				<p id="menu">The menu is not available at this time.</p>
+				<p>*Taxes not included</p>
+			</section>
 
-            <nav class="sectionEnd">
-                <div class="container">
-                    <ul>
-                        <li>
-                            <a onclick='submitOrder()'>Submit new Order</a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+			<nav class="sectionEnd">
+				<div class="container">
+					<ul>
+						<li>
+							<a href="#menu" onclick="deleteSelected()">Delete Selected Items</a>
+						</li>
+					</ul>
+				</div>
+			</nav>
 
-            <div>
-                <section >
-                        <h3>Past Orders</h3>
-                        <p id="pastorders">You have no Past Orders</p>
-                </section>
+			<br />
 
-            <nav class="sectionEnd">
-                <div class="container">
-                    <ul>
-                        <li>
-                            <a onclick="cancelOrders()">Cancel Selected Orders</a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-        </div>
-        
-        <div class="clr"></div>
+			<nav class="sectionEnd">
+				<div class="container">
+					<ul>
+						<li>
+							<a href="#menu" onclick="deleteMenu()">Delete Entire Menu</a>
+						</li>
+					</ul>
+				</div>
+			</nav>
 
-        <script type="text/javascript">
-            function get(location) {
-                const queryString = window.location.search;
-                window.location.href = `${location}${queryString}`;
-            }
-        </script>
-    </body>
+			<section>
+				<h3>Add New Item</h3>
+				<fieldset>
+					<label for="name">Name </label>
+					<input type="text" name="name" id="i1" value="Orange Mocha Frappucino" /> <br />
+					<label for="size">Size </label>
+					<input type="text" name="size" id="i2" value="Tio Grande" /> <br />
+					<label for="price">Price </label>
+					<input type="number" name="price" id="i3" value="19.99" /> <br />
+					<label for="time">Time Required </label>
+					<input type="number" name="time" id="i4" value="5" /> <br />
+					<label for="description">Description </label> <br />
+					<textarea name="data" id="i5" cols="70" rows="5">Caffeine</textarea>
+				</fieldset>
+			</section>
+
+			<nav class="sectionEnd">
+				<div class="container">
+					<ul>
+						<li>
+							<a href="#menu" onclick="addItem()">Add New Item to Menu</a>
+						</li>
+					</ul>
+				</div>
+			</nav>
+
+			<section>
+				<h3>All Open Orders</h3>
+				<p id="openorders">There are no open Orders</p>
+			</section>
+
+			<section>
+				<h3>All Ready Orders</h3>
+				<p id="readyorders">There are no ready Orders</p>
+			</section>
+
+			<nav class="sectionEnd">
+				<div class="container">
+					<ul>
+						<li>
+							<a href="#menu" onclick="openOrders()">Inform Selected Customers their Orders are Ready</a>
+						</li>
+					</ul>
+				</div>
+			</nav>
+		</div>
+
+		<div class="clr"></div>
+
+		<script type="text/javascript">
+			function get(location) {
+				const queryString = window.location.search;
+				window.location.href = `${location}${queryString}`;
+			}
+
+			let menuItems = [];
+			function getMenu() {
+				menuItems = [];
+				let httpRequest = new XMLHttpRequest();
+				httpRequest.addEventListener('load', () => {
+					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+						let menu = JSON.parse(httpRequest.responseText);
+						let table = "<table border='1' id='menu-table' >";
+						if (menu.length > 0) {
+							for (item in menu) {
+								if (!menuItems.indexOf(menu[item].menu_id) >= 0) menuItems.push(menu[item].menu_id);
+								table +=
+									'<td> <td> ' +
+									`<input type="checkbox" id="menu_${menu[item].menu_id}" name="menu_${menu[item].menu_id}" value="menu_${menu[item].menu_id}">` +
+									'<td> <td> ' +
+									`<input type="number" id="quantity_${menu[item].menu_id}" name="quantity_${menu[item].menu_id}" min="1" max="5" value="1">` +
+									'<td> <td> ' +
+									menu[item].name +
+									'</td> <td>' +
+									menu[item].size +
+									'</td> <td>' +
+									'$' +
+									menu[item].price +
+									'</td> <td>' +
+									menu[item].description +
+									'</td> </tr>';
+							}
+							table += '</table>';
+							document.getElementById('menu').innerHTML = table;
+						} else {
+							document.getElementById('menu').innerHTML = 'The menu is currently empty';
+						}
+					} else {
+						document.getElementById('menu').innerHTML = 'The menu is not available at this time.';
+					}
+				});
+
+				let url = '/menu';
+				httpRequest.open('GET', url, true);
+				httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+				httpRequest.send();
+			}
+
+			function deleteSelected() {
+				let httpRequest = new XMLHttpRequest();
+				httpRequest.addEventListener('load', () => {
+					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+						alert('Item(s) Deleted');
+						getMenu();
+					} else alert(httpRequest.responseText);
+				});
+				for (item in menuItems) {
+					if (document.getElementById(`menu_${menuItems[item]}`).checked == true) {
+						let params = `menu_id=${menuItems[item]}`;
+						let url = '/deletemenuitem';
+						httpRequest.open('POST', url, true);
+						httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+						httpRequest.send(params);
+					}
+				}
+			}
+
+			function deleteMenu() {
+				let httpRequest = new XMLHttpRequest();
+				httpRequest.addEventListener('load', () => {
+					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+						alert('Menu Deleted');
+						getMenu();
+					} else alert(httpRequest.responseText);
+				});
+				let url = '/deletemenu';
+				httpRequest.open('POST', url, true);
+				httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+				httpRequest.send();
+			}
+
+			function addItem() {
+				let name = document.getElementById('i1').value;
+				let size = document.getElementById('i2').value;
+				let price = document.getElementById('i3').value;
+				let time_required = document.getElementById('i4').value;
+				let description = document.getElementById('i5').value;
+
+				if (name && size && price && time_required && description) {
+					let httpRequest = new XMLHttpRequest();
+					httpRequest.addEventListener('load', () => {
+						if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+							alert('Menu Item Added');
+							getMenu();
+						} else alert(httpRequest.responseText);
+					});
+					let params = `name="${name}"&size="${size}"&price="${price}"&time_required="${time_required}"&description="${description}"`;
+					let url = '/addmenuitem';
+					httpRequest.open('POST', url, true);
+					httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+					httpRequest.send();
+				} else alert('Invalid Input Parameters');
+			}
+
+			function getOpenOrders() {
+				let httpRequest = new XMLHttpRequest();
+				httpRequest.addEventListener('load', () => {
+					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+						let orders = JSON.parse(httpRequest.responseText);
+						let table = "<table border='1' id='order-table' >";
+						if (orders.length > 0) {
+							for (order in orders) {
+								table +=
+									'<td> <td> ' +
+									`<input type="checkbox" id="order_${orders[order].order_id}" name="order_${orders[order].order_id}" value="order_${orders[order].order_id}">` +
+									'</td> <td>' +
+									`${orders[order].finished ? 'Completed' : 'In Progress'}` +
+									'<td> <td> ' +
+									`${orders[order].cancelled ? 'Cancelled' : ''}` +
+									'<td> <td> ' +
+									'Creation Time: ' +
+									orders[order].created +
+									'</td> <td>' +
+									'Cost: ' +
+									orders[order].cost +
+									'</td> <td>' +
+									orders[order].items +
+									'</td> </tr>';
+							}
+							table += '</table>';
+							document.getElementById('openorders').innerHTML = table;
+						} else {
+							document.getElementById('openorders').innerHTML = 'There are no open Orders';
+						}
+					} else {
+						console.log(httpRequest.responseText);
+						document.getElementById('openorders').innerHTML = 'Open Orders cannot be seen at this time.';
+					}
+				});
+				let url = '/allopenorders';
+				httpRequest.open('GET', url, true);
+				httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+				httpRequest.send();
+			}
+
+			function getReadyorders() {}
+
+			function informCustomer() {}
+
+			getMenu();
+			getOpenOrders();
+			getReadyorders();
+		</script>
+	</body>
 </html>

@@ -4,8 +4,8 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="description" content="CMPT 353 Evangellos Wiegers" />
-        <meta name="author" content="Evan (Evangellos) Wiegers" />
-        <link rel="stylesheet" href="style.css" />
+		<meta name="author" content="Evan (Evangellos) Wiegers" />
+		<link rel="stylesheet" href="style.css" />
 		<title>Past Orders</title>
 	</head>
 	<body>
@@ -13,189 +13,192 @@
 			<div class="container">
 				<h1>Your Orders</h1>
 			</div>
-        </header>
+		</header>
 
-        <nav id="navbar">
+		<nav id="navbar">
 			<div class="container">
 				<ul>
 					<li><a href="#navbar" onclick='get("/main")'>Return to Menu</a></li>
 				</ul>
 			</div>
-        </nav>
+		</nav>
 
-        <div class="container">
-            <div>
-                <section >
-                        <h3>Make a new Order!</h3>
-                        <p id="menu">The menu is not available at this time.</p>
-                        <p>*Taxes not included</p>
-                </section>
+		<div class="container">
+			<section>
+				<h3>Make a new Order!</h3>
+				<p id="menu">The menu is not available at this time.</p>
+				<p>*Taxes not included</p>
+			</section>
 
-            <nav class="sectionEnd">
-                <div class="container">
-                    <ul>
-                        <li>
-                            <a onclick='submitOrder()'>Submit new Order</a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+			<nav class="sectionEnd">
+				<div class="container">
+					<ul>
+						<li>
+							<a onclick="submitOrder()">Submit new Order</a>
+						</li>
+					</ul>
+				</div>
+			</nav>
 
-            <div>
-                <section >
-                        <h3>Past Orders</h3>
-                        <p id="pastorders">You have no Past Orders</p>
-                </section>
+			<section>
+				<h3>Past Orders</h3>
+				<p id="pastorders">You have no Past Orders</p>
+			</section>
 
-            <nav class="sectionEnd">
-                <div class="container">
-                    <ul>
-                        <li>
-                            <a onclick="cancelOrders()">Cancel Selected Orders</a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-        </div>
-        
-        <div class="clr"></div>
-        
-        <script type="text/javascript">
-    		function get(location) {
+			<nav class="sectionEnd">
+				<div class="container">
+					<ul>
+						<li>
+							<a onclick="cancelOrders()">Cancel Selected Orders</a>
+						</li>
+					</ul>
+				</div>
+			</nav>
+		</div>
+
+		<div class="clr"></div>
+
+		<script type="text/javascript">
+			function get(location) {
 				const queryString = window.location.search;
 				window.location.href = `${location}${queryString}`;
-            }
+			}
 
-            let orderItems = [];
-            function getPastOrders() {
-                orderItems = [];
-                let httpRequest = new XMLHttpRequest();
-                httpRequest.addEventListener('load', () => {
-                    if (httpRequest.readyState == 4 && httpRequest.status == 200) {
-                        let orders = JSON.parse(httpRequest.responseText);
-                        let table = "<table border='1' id='menu-table' >";
-                        if (orders.length > 0) {
-                            for (order in orders) {
-                                if (!orderItems.indexOf(orders[order].order_id) >= 0) orderItems.push(orders[order].order_id);
-                                    table +=
-                                        '<td> <td> ' +
-                                        `<input type="checkbox" id="order_${orders[order].order_id}" name="order_${orders[order].order_id}" value="order_${orders[order].order_id}">` +
-                                        '</td> <td>' +
-                                        `${orders[order].finished ? 'Completed' : 'In Progress'}` +
-                                        '<td> <td> ' +
-                                        `${orders[order].cancelled ? 'Cancelled' : ''}` +
-                                        '<td> <td> ' +
-                                        'Creation Time: ' + orders[order].created +
-                                        '</td> <td>' +
-                                        'Cost: ' + orders[order].cost +
-                                        '</td> <td>' +
-                                        orders[order].items +
-                                        '</td> </tr>';
-                            }    
-                            table += '</table>';     
-                            document.getElementById('pastorders').innerHTML = table;
-                        } else {
-                            document.getElementById('pastorders').innerHTML = 'You have no Past Orders';
-                        }
-                    } else {
-                        console.log(httpRequest.responseText);
-                        document.getElementById('pastorders').innerHTML = 'Past Orders cannot be seen at this time.';
-                    }
-                });
-                let url = '/getorders';
-                httpRequest.open('GET', url, true);
-                httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-                httpRequest.send();
-            }
+			let orderItems = [];
+			function getPastOrders() {
+				orderItems = [];
+				let httpRequest = new XMLHttpRequest();
+				httpRequest.addEventListener('load', () => {
+					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+						let orders = JSON.parse(httpRequest.responseText);
+						let table = "<table border='1' id='order-table' >";
+						if (orders.length > 0) {
+							for (order in orders) {
+								if (!orderItems.indexOf(orders[order].order_id) >= 0)
+									orderItems.push(orders[order].order_id);
+								table +=
+									'<td> <td> ' +
+									`<input type="checkbox" id="order_${orders[order].order_id}" name="order_${orders[order].order_id}" value="order_${orders[order].order_id}">` +
+									'</td> <td>' +
+									`${orders[order].finished ? 'Completed' : 'In Progress'}` +
+									'<td> <td> ' +
+									`${orders[order].cancelled ? 'Cancelled' : ''}` +
+									'<td> <td> ' +
+									'Creation Time: ' +
+									orders[order].created +
+									'</td> <td>' +
+									'Cost: ' +
+									orders[order].cost +
+									'</td> <td>' +
+									orders[order].items +
+									'</td> </tr>';
+							}
+							table += '</table>';
+							document.getElementById('pastorders').innerHTML = table;
+						} else {
+							document.getElementById('pastorders').innerHTML = 'You have no Past Orders';
+						}
+					} else {
+						console.log(httpRequest.responseText);
+						document.getElementById('pastorders').innerHTML = 'Past Orders cannot be seen at this time.';
+					}
+				});
+				let url = '/getorders';
+				httpRequest.open('GET', url, true);
+				httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+				httpRequest.send();
+			}
 
-            function cancelOrders() {
-                let httpRequest = new XMLHttpRequest();
-                httpRequest.addEventListener('load', () => {
-                    if (httpRequest.readyState == 4 && httpRequest.status == 200) {
-                        alert('Orders Cancelled');
-                        getPastOrders();
-                    } else alert(httpRequest.responseText);
-                });
-                for (item in orderItems) {
-                    // console.log(document.getElementById(`order_${orderItems[item]}`));
-                    if (document.getElementById(`order_${orderItems[item]}`).checked == true) {
-                        params = `order_id=${orderItems[item]}`
-                        let url = '/cancelorder';
-                        httpRequest.open('POST', url, true);
-                        httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-                        httpRequest.send(params);
-                    }
-                }
-            }
-            
-            let menuItems = [];
-            function getMenu() {
-                menuItems = [];
-                let httpRequest = new XMLHttpRequest();
-                httpRequest.addEventListener('load', () => {
-                    if (httpRequest.readyState == 4 && httpRequest.status == 200) {
-                        let menu = JSON.parse(httpRequest.responseText);
-                        let table = "<table border='1' id='menu-table' >";
-                        if (menu.length > 0) {
-                            for (item in menu) {
-                                if (!menuItems.indexOf(menu[item].menu_id) >= 0) menuItems.push(menu[item].menu_id);
-                                table +=
-                                    '<td> <td> ' +
-                                    `<input type="checkbox" id="menu_${menu[item].menu_id}" name="menu_${menu[item].menu_id}" value="menu_${menu[item].menu_id}">` +
-                                    '<td> <td> ' +
-                                    `<input type="number" id="quantity_${menu[item].menu_id}" name="quantity_${menu[item].menu_id}" min="1" max="5" value="1">` +
-                                    '<td> <td> ' +
-                                    menu[item].name +
-                                    '</td> <td>' +
-                                    menu[item].size +
-                                    '</td> <td>' +
-                                    '$' +
-                                    menu[item].price +
-                                    '</td> <td>' +
-                                    menu[item].description +
-                                    '</td> </tr>';
-                            }
-                            table += '</table>';
-                            document.getElementById('menu').innerHTML = table;
-                        } else {
-                            document.getElementById('menu').innerHTML = 'The menu is currently empty';
-                        }
-                    } else {
-                        document.getElementById('menu').innerHTML = 'The menu is not available at this time.';
-                    }
-                });
+			function cancelOrders() {
+				let httpRequest = new XMLHttpRequest();
+				httpRequest.addEventListener('load', () => {
+					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+						alert('Orders Cancelled');
+						getPastOrders();
+					} else alert(httpRequest.responseText);
+				});
+				for (item in orderItems) {
+					// console.log(document.getElementById(`order_${orderItems[item]}`));
+					if (document.getElementById(`order_${orderItems[item]}`).checked == true) {
+						params = `order_id=${orderItems[item]}`;
+						let url = '/cancelorder';
+						httpRequest.open('POST', url, true);
+						httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+						httpRequest.send(params);
+					}
+				}
+			}
 
-                let url = '/menu';
-                httpRequest.open('GET', url, true);
-                httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-                httpRequest.send();
-            }
+			let menuItems = [];
+			function getMenu() {
+				menuItems = [];
+				let httpRequest = new XMLHttpRequest();
+				httpRequest.addEventListener('load', () => {
+					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+						let menu = JSON.parse(httpRequest.responseText);
+						let table = "<table border='1' id='menu-table' >";
+						if (menu.length > 0) {
+							for (item in menu) {
+								if (!menuItems.indexOf(menu[item].menu_id) >= 0) menuItems.push(menu[item].menu_id);
+								table +=
+									'<td> <td> ' +
+									`<input type="checkbox" id="menu_${menu[item].menu_id}" name="menu_${menu[item].menu_id}" value="menu_${menu[item].menu_id}">` +
+									'<td> <td> ' +
+									`<input type="number" id="quantity_${menu[item].menu_id}" name="quantity_${menu[item].menu_id}" min="1" max="5" value="1">` +
+									'<td> <td> ' +
+									menu[item].name +
+									'</td> <td>' +
+									menu[item].size +
+									'</td> <td>' +
+									'$' +
+									menu[item].price +
+									'</td> <td>' +
+									menu[item].description +
+									'</td> </tr>';
+							}
+							table += '</table>';
+							document.getElementById('menu').innerHTML = table;
+						} else {
+							document.getElementById('menu').innerHTML = 'The menu is currently empty';
+						}
+					} else {
+						document.getElementById('menu').innerHTML = 'The menu is not available at this time.';
+					}
+				});
 
-            function submitOrder() {
-                let httpRequest = new XMLHttpRequest();
-                httpRequest.addEventListener('load', () => {
-                    if (httpRequest.readyState == 4 && httpRequest.status == 200) {
-                        alert('Order Submitted');
-                        getPastOrders();
-                    } else alert(httpRequest.responseText);
-                });
-                params = ``;
-                for (item in menuItems) {
-                    if (document.getElementById(`menu_${menuItems[item]}`).checked == true) {
-                        params += `&${menuItems[item]}=${menuItems[item]}_${document.getElementById(`quantity_${menuItems[item]}`).value}`;
-                    }
-                }
-                if (params.length > 1) {
-                    let url = '/submitorder';
-                    params = params.substring(1);
-                    httpRequest.open('POST', url, true);
-                    httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-                    httpRequest.send(params);
-                } else alert('Please select an item to order!');
-            }
+				let url = '/menu';
+				httpRequest.open('GET', url, true);
+				httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+				httpRequest.send();
+			}
 
-            getPastOrders();
-            getMenu();
-        </script>
+			function submitOrder() {
+				let httpRequest = new XMLHttpRequest();
+				httpRequest.addEventListener('load', () => {
+					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+						alert('Order Submitted');
+						getPastOrders();
+					} else alert(httpRequest.responseText);
+				});
+				params = ``;
+				for (item in menuItems) {
+					if (document.getElementById(`menu_${menuItems[item]}`).checked == true) {
+						params += `&${menuItems[item]}=${menuItems[item]}_${
+							document.getElementById(`quantity_${menuItems[item]}`).value
+						}`;
+					}
+				}
+				if (params.length > 1) {
+					let url = '/submitorder';
+					params = params.substring(1);
+					httpRequest.open('POST', url, true);
+					httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+					httpRequest.send(params);
+				} else alert('Please select an item to order!');
+			}
+
+			getPastOrders();
+			getMenu();
+		</script>
 	</body>
 </html>
