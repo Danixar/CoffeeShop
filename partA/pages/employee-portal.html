@@ -42,7 +42,7 @@
 
 			<br />
 
-			<nav class="sectionEnd">
+			<!-- <nav class="sectionEnd">
 				<div class="container">
 					<ul>
 						<li>
@@ -50,7 +50,7 @@
 						</li>
 					</ul>
 				</div>
-			</nav>
+			</nav> -->
 
 			<section>
 				<h3>Add New Item</h3>
@@ -92,7 +92,9 @@
 				<div class="container">
 					<ul>
 						<li>
-							<a href="#menu" onclick="openOrders()">Inform Selected Customers their Orders are Ready</a>
+							<a href="#menu" onclick="informCustomer()"
+								>Inform Selected Customers their Orders are Ready</a
+							>
 						</li>
 					</ul>
 				</div>
@@ -121,8 +123,6 @@
 								table +=
 									'<td> <td> ' +
 									`<input type="checkbox" id="menu_${menu[item].menu_id}" name="menu_${menu[item].menu_id}" value="menu_${menu[item].menu_id}">` +
-									'<td> <td> ' +
-									`<input type="number" id="quantity_${menu[item].menu_id}" name="quantity_${menu[item].menu_id}" min="1" max="5" value="1">` +
 									'<td> <td> ' +
 									menu[item].name +
 									'</td> <td>' +
@@ -156,6 +156,7 @@
 					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
 						alert('Item(s) Deleted');
 						getMenu();
+						getOpenOrders();
 					} else alert(httpRequest.responseText);
 				});
 				for (item in menuItems) {
@@ -169,19 +170,19 @@
 				}
 			}
 
-			function deleteMenu() {
-				let httpRequest = new XMLHttpRequest();
-				httpRequest.addEventListener('load', () => {
-					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
-						alert('Menu Deleted');
-						getMenu();
-					} else alert(httpRequest.responseText);
-				});
-				let url = '/deletemenu';
-				httpRequest.open('POST', url, true);
-				httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-				httpRequest.send();
-			}
+			// function deleteMenu() {
+			// 	let httpRequest = new XMLHttpRequest();
+			// 	httpRequest.addEventListener('load', () => {
+			// 		if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+			// 			alert('Menu Deleted');
+			// 			getMenu();
+			// 		} else alert(httpRequest.responseText);
+			// 	});
+			// 	let url = '/deletemenu';
+			// 	httpRequest.open('POST', url, true);
+			// 	httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+			// 	httpRequest.send();
+			// }
 
 			function addItem() {
 				let name = document.getElementById('i1').value;
@@ -198,11 +199,11 @@
 							getMenu();
 						} else alert(httpRequest.responseText);
 					});
-					let params = `name="${name}"&size="${size}"&price="${price}"&time_required="${time_required}"&description="${description}"`;
+					let params = `name=${name}&size=${size}&price=${price}&time_required=${time_required}&description=${description}`;
 					let url = '/addmenuitem';
 					httpRequest.open('POST', url, true);
 					httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-					httpRequest.send();
+					httpRequest.send(params);
 				} else alert('Invalid Input Parameters');
 			}
 
@@ -215,8 +216,6 @@
 						if (orders.length > 0) {
 							for (order in orders) {
 								table +=
-									'<td> <td> ' +
-									`<input type="checkbox" id="order_${orders[order].order_id}" name="order_${orders[order].order_id}" value="order_${orders[order].order_id}">` +
 									'</td> <td>' +
 									`${orders[order].finished ? 'Completed' : 'In Progress'}` +
 									'<td> <td> ' +
@@ -247,9 +246,67 @@
 				httpRequest.send();
 			}
 
-			function getReadyorders() {}
+			readyItems = [];
+			function getReadyorders() {
+				readyItems = [];
+				let httpRequest = new XMLHttpRequest();
+				httpRequest.addEventListener('load', () => {
+					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+						let orders = JSON.parse(httpRequest.responseText);
+						let table = "<table border='1' id='order-table' >";
+						if (orders.length > 0) {
+							for (order in orders) {
+								readyItems.push(orders[order].order_id);
+								table +=
+									'<td> <td> ' +
+									`<input type="checkbox" id="readyorder_${orders[order].order_id}" name="readyorder_${orders[order].order_id}" value="readyorder_${orders[order].order_id}">` +
+									'</td> <td>' +
+									`${orders[order].finished ? 'Completed' : 'In Progress'}` +
+									'<td> <td> ' +
+									`${orders[order].cancelled ? 'Cancelled' : ''}` +
+									'<td> <td> ' +
+									'Creation Time: ' +
+									orders[order].created +
+									'</td> <td>' +
+									'Cost: ' +
+									orders[order].cost +
+									'</td> <td>' +
+									orders[order].items +
+									'</td> </tr>';
+							}
+							table += '</table>';
+							document.getElementById('readyorders').innerHTML = table;
+						} else {
+							document.getElementById('readyorders').innerHTML = 'There are no ready Orders';
+						}
+					} else {
+						console.log(httpRequest.responseText);
+						document.getElementById('readyorders').innerHTML = 'Ready Orders cannot be seen at this time.';
+					}
+				});
+				let url = '/allcompletedorders';
+				httpRequest.open('GET', url, true);
+				httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+				httpRequest.send();
+			}
 
-			function informCustomer() {}
+			function informCustomer() {
+				let httpRequest = new XMLHttpRequest();
+				httpRequest.addEventListener('load', () => {
+					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+						alert('Customers Informed');
+					} else alert(httpRequest.responseText);
+				});
+				for (item in readyItems) {
+					if (document.getElementById(`readyorder_${readyItems[item]}`).checked == true) {
+						params = `order_id=${readyItems[item]}`;
+						let url = '/informcustomer';
+						httpRequest.open('POST', url, true);
+						httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+						httpRequest.send(params);
+					}
+				}
+			}
 
 			getMenu();
 			getOpenOrders();

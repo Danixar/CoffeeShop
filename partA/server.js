@@ -35,6 +35,7 @@ const setupTables = async () => {
             price DECIMAL(15,2) NOT NULL,
             time_required int NOT NULL,
             description VARCHAR(1000),
+            removed BOOLEAN default 0,
             PRIMARY KEY (menu_id)
             );`);
 	query(`CREATE TABLE IF NOT EXISTS employees(
@@ -75,6 +76,13 @@ const setupTables = async () => {
             customer boolean NOT NULL default 1,
             user_id int NOT NULL,
             last_used timestamp NOT NULL
+            );`);
+	query(`CREATE TABLE IF NOT EXISTS ready_orders(
+            ready_id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            customer_id int NOT NULL,
+            name VARCHAR(100) NOT NULL,
+            order_id int NOT NULL,
+            posted timestamp NOT NULL
             );`);
 };
 db.connect((err) => {
@@ -171,8 +179,7 @@ app.post('/login', async (req, res) => {
 		const resultTokens = await query(
 			`SELECT * FROM tokens WHERE user_id = ${id} and minute(last_used) = minute(curtime());`
 		);
-		// auth_id = resultTokens[0].user_id;
-		// customer = resultTokens[0].customer;
+		auth_id = resultTokens[0].user_id;
 
 		res.redirect(`/?token=${resultTokens[0].token}`);
 	} catch (err) {
@@ -227,7 +234,7 @@ app.get('/signout', (req, res) => {
 // GET menu items
 app.get('/menu', async (req, res) => {
 	try {
-		const result = await query(`SELECT * FROM menu_items;`);
+		const result = await query(`SELECT * FROM menu_items WHERE removed = 0;`);
 		res.send(result);
 	} catch (err) {
 		res.status(500).send('Failed to get menu items');
@@ -261,9 +268,7 @@ app.post('/submitorder', async (req, res) => {
 		try {
 			await query(`INSERT INTO orders(customer_id, created_at) VALUES (${auth_id}, now());`);
 
-			const result = await query(
-				`SELECT * FROM orders WHERE minute(created_at) = minute(curtime()) and customer_id=${auth_id};`
-			);
+			const result = await query(`SELECT * FROM orders WHERE customer_id=${auth_id};`);
 
 			let timeMinutes = 0;
 			await Promise.all(
@@ -271,7 +276,9 @@ app.post('/submitorder', async (req, res) => {
 					let itemName = item.split('_')[0];
 					let quantity = item.split('_')[1];
 					await query(
-						`INSERT INTO ordered_items(menu_id, order_id, quantity) VALUES (${itemName}, ${result[0].order_id}, ${quantity});`
+						`INSERT INTO ordered_items(menu_id, order_id, quantity) VALUES (${itemName}, ${
+							result[result.length - 1].order_id
+						}, ${quantity});`
 					);
 
 					const menu_item = await query(`SELECT * FROM menu_items WHERE menu_id=${itemName};`);
@@ -384,20 +391,20 @@ app.get('/customerrevoked', async (req, res) => {
 	res.sendFile(path.join(__dirname, 'pages', 'customer-revoked.html'));
 });
 
-const createMenu = async () => {
-	const sql = `CREATE TABLE IF NOT EXISTS menu_items(
-        menu_id int NOT NULL AUTO_INCREMENT,
-        employee_id int,
-        name VARCHAR(50) NOT NULL,
-        size VARCHAR(50) NOT NULL,
-        price NUMERIC NOT NULL,
-        time_required TIME NOT NULL,
-        description VARCHAR(50), c
-        reated_at TIMESTAMP,
-        PRIMARY KEY (menu_id)
-        );`;
-	await query(sql);
-};
+// const createMenu = async () => {
+// 	const sql = `CREATE TABLE IF NOT EXISTS menu_items(
+//         menu_id int NOT NULL AUTO_INCREMENT,
+//         employee_id int,
+//         name VARCHAR(50) NOT NULL,
+//         size VARCHAR(50) NOT NULL,
+//         price NUMERIC NOT NULL,
+//         time_required TIME NOT NULL,
+//         description VARCHAR(50), c
+//         reated_at TIMESTAMP,
+//         PRIMARY KEY (menu_id)
+//         );`;
+// 	await query(sql);
+// };
 
 // // POST create menu
 // app.post('/createmenu', async (req, res) => {
@@ -423,21 +430,21 @@ const createMenu = async () => {
 // 	} else res.status(400).send('Improper access permissions');
 // });
 
-// POST delete menu
-app.post('/deletemenu', async (req, res) => {
-	if (auth_id && !customer) {
-		try {
-			await query(`DROP TABLE menu_items;`);
-			await query(`UPDATE orders SET cancelled = 1;`);
-			await query(`TRUNCATE TABLE ordered_items;`);
-			await createMenu(); // Create new empty menu
-			res.send('Deleted Menu');
-		} catch (err) {
-			console.log(err);
-			res.status(500).send('Failed to delete menu');
-		}
-	} else res.status(400).send('Improper access permissions');
-});
+// // POST delete menu
+// app.post('/deletemenu', async (req, res) => {
+// 	if (auth_id && !customer) {
+// 		try {
+// 			await query(`DROP TABLE menu_items;`);
+// 			await query(`UPDATE orders SET cancelled = 1;`);
+// 			await query(`TRUNCATE TABLE ordered_items;`);
+// 			await createMenu(); // Create new empty menu
+// 			res.send('Deleted Menu');
+// 		} catch (err) {
+// 			console.log(err);
+// 			res.status(500).send('Failed to delete menu');
+// 		}
+// 	} else res.status(400).send('Improper access permissions');
+// });
 
 // POST add menu item
 app.post('/addmenuitem', async (req, res) => {
@@ -469,9 +476,7 @@ app.post('/deletemenuitem', async (req, res) => {
 		try {
 			const result = await query(`SELECT * FROM menu_items WHERE menu_id = ${menu_id};`);
 
-			await query(`DELETE FROM menu_items WHERE menu_id = ${result[0].menu_id} LIMIT 1;`);
-
-			await query(`DELETE FROM ordered_items WHERE menu_id = ${result[0].menu_id};`);
+			await query(`UPDATE menu_items SET removed = 1 WHERE menu_id = ${result[0].menu_id};`);
 
 			res.send('Deleted Menu Item');
 		} catch (err) {
@@ -486,7 +491,7 @@ app.get('/allopenorders', async (req, res) => {
 	if (auth_id && !customer) {
 		try {
 			const result = await query(
-				`SELECT * FROM orders WHERE completed_at > CURDATE() AND cancelled = 0 ORDER BY created_at ASC;`
+				`SELECT * FROM orders WHERE completed_at > CURDATE() AND cancelled = 0 ORDER BY created_at DESC;`
 			);
 			const orders = await Promise.all(result.map(async (item) => await check(item.order_id)));
 			res.send(orders);
@@ -502,7 +507,7 @@ app.get('/allcompletedorders', async (req, res) => {
 	if (auth_id && !customer) {
 		try {
 			const result = await query(
-				`SELECT * FROM orders WHERE completed_at < CURDATE() AND cancelled = 0 ORDER BY created_at ASC;`
+				`SELECT * FROM orders WHERE completed_at <= CURDATE() AND cancelled = 0 ORDER BY created_at DESC;`
 			);
 			const orders = await Promise.all(result.map(async (item) => await check(item.order_id)));
 			res.send(orders);
@@ -514,27 +519,29 @@ app.get('/allcompletedorders', async (req, res) => {
 });
 
 // POST order ready for pickup
-app.post('/ordersready', async (req, res) => {});
+app.post('/informcustomer', async (req, res) => {
+	try {
+		const order_id = req.body.order_id;
+		const result = await query(`SELECT * FROM orders WHERE order_id = ${order_id};`);
+		const customer_id = result[0].customer_id;
+		const customer = await query(`SELECT * FROM customers WHERE customer_id = ${customer_id}`);
+		const name = `${customer[0].first_name} ${customer[0].last_name}`;
+		await query(
+			`INSERT INTO ready_orders (customer_id, name, order_id, posted) VALUES (${customer_id}, "${name}", ${result[0].order_id}, now())`
+		);
+		res.send('Customer Informed');
+	} catch (err) {
+		console.log(err);
+		res.status(500).send('Failed to inform customer');
+	}
+});
 
 // GET all orders ready for pickup
 app.get('/ordersready', async (req, res) => {
 	try {
-		const resultOrders = await query(
-			`SELECT * FROM orders WHERE completed_at <= now() AND cancelled = 0 ORDER BY created_at;`
-		);
-
-		const items = await Promise.all(resultOrders.map(async (item) => await check(item.order_id)));
-
-		const orders = await Promise.all(
-			resultOrders.map(async (order) => {
-				console.log(order);
-				let customers = await query(`SELECT * FROM customers WHERE customer_id = ${order.customer_id};`);
-				let name = customers[0].last_name;
-				let items = await query(`SELECT * FROM ordered_items WHERE customer_id = ${order.customer_id};`);
-				return { name: name, items: items.map((item) => `${item.name} ${item.size}`) };
-			})
-		);
-		res.send(orders);
+		await query(`DELETE FROM ready_orders WHERE HOUR(now()) != HOUR(posted)`);
+		const result = await query(`SELECT * FROM ready_orders;`);
+		res.send(result);
 	} catch (err) {
 		console.log(err);
 		res.status(500).send('Failed to get orders');

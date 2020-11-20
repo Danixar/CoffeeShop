@@ -54,6 +54,8 @@
 				<br />
 				<h2>Employee Options:</h2>
 				<a href="#main" onclick='get("employeeportal")'>Employee Portal</a><br />
+				<h1>Orders Ready for Pickup</h1>
+				<p id="readyorders"></p>
 			</section>
 		</div>
 
@@ -76,14 +78,6 @@
 				<h1>Made from only the finest coffee beans grown in the beautiful climate of North Canada</h1>
 			</div>
 		</section>
-
-		<div class="container">
-			<section>
-				<h1>Orders Ready for Pickup</h1>
-				<p id="readyorders"></p>
-				<a href="#main">Make an Order Now!</a>
-			</section>
-		</div>
 
 		<footer id="main-footer">
 			<p>Copyright &copy; 2020 Coffee Shop</p>
@@ -132,77 +126,27 @@
 			}
 
 			function getReadyOrders() {
-				let httpRequest = new XMLHttpRequest();
-				httpRequest.addEventListener('load', () => {
-					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
-						let orders = JSON.parse(httpRequest.responseText);
-						if (orders.length > 1) {
-							let table = "<table border='1' id='menu-table' >";
-							for (order in orders) {
-								table +=
-									'<td> <td> ' +
-									orders[order].name +
-									'</td> <td>' +
-									orders[order].items +
-									'</td> </tr>';
-							}
-							table += '</table>';
-							document.getElementById('readyorders').innerHTML = table;
-						} else document.getElementById('readyorders').innerHTML = 'No available orders at this time.';
-					} else {
-						console.log(httpRequest.responseText);
-						document.getElementById('readyorders').innerHTML =
-							'Available orders are not viewable at this time.';
-					}
-					setTimeout(getReadyOrders, 10000);
-				});
-
-				let url = '/ordersready';
-				httpRequest.open('GET', url, true);
-				httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-				httpRequest.send();
-			}
-
-			let orderItems = [];
-			function getPastOrders() {
 				orderItems = [];
 				let httpRequest = new XMLHttpRequest();
 				httpRequest.addEventListener('load', () => {
 					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
 						let orders = JSON.parse(httpRequest.responseText);
-						let table = "<table border='1' id='menu-table' >";
+						let nameList = `<ul>`;
 						if (orders.length > 0) {
 							for (order in orders) {
-								if (!orderItems.indexOf(orders[order].order_id) >= 0)
-									orderItems.push(orders[order].order_id);
-								table +=
-									'<td> <td> ' +
-									`<input type="checkbox" id="order_${orders[order].order_id}" name="order_${orders[order].order_id}" value="order_${orders[order].order_id}">` +
-									'</td> <td>' +
-									`${orders[order].finished ? 'Completed' : 'In Progress'}` +
-									'<td> <td> ' +
-									`${orders[order].cancelled ? 'Cancelled' : ''}` +
-									'<td> <td> ' +
-									'Creation Time: ' +
-									orders[order].created +
-									'</td> <td>' +
-									'Cost: ' +
-									orders[order].cost +
-									'</td> <td>' +
-									orders[order].items +
-									'</td> </tr>';
+								nameList += `<li>${orders[order].name} </li>`;
 							}
-							table += '</table>';
-							document.getElementById('pastorders').innerHTML = table;
+							nameList += `</ul>`;
+							document.getElementById('readyorders').innerHTML = nameList;
 						} else {
-							document.getElementById('pastorders').innerHTML = 'You have no Past Orders';
+							document.getElementById('readyorders').innerHTML = 'No orders for pickup right now!';
 						}
 					} else {
 						console.log(httpRequest.responseText);
-						document.getElementById('pastorders').innerHTML = 'Past Orders cannot be seen at this time.';
+						document.getElementById('readyorders').innerHTML = 'Ready Orders cannot be seen at this time.';
 					}
 				});
-				let url = '/getorders';
+				let url = '/ordersready';
 				httpRequest.open('GET', url, true);
 				httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 				httpRequest.send();

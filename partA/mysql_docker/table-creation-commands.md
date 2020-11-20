@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS menu_items(
      price DECIMAL(15,2) NOT NULL,
      time_required int NOT NULL,
      description VARCHAR(1000),
+     removed BOOLEAN default 0,
      PRIMARY KEY (menu_id)
      );
 ```
@@ -81,5 +82,17 @@ CREATE TABLE IF NOT EXISTS tokens(
     customer boolean NOT NULL default 1,
     user_id int NOT NULL,
     last_used timestamp NOT NULL
+    );
+```
+
+### READY_CUSTOMERS
+
+```
+CREATE TABLE IF NOT EXISTS ready_orders(
+    ready_id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    customer_id int NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    order_id int NOT NULL,
+    posted timestamp NOT NULL
     );
 ```
