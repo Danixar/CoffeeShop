@@ -109,8 +109,6 @@ let token = null;
 let auth_id = null;
 let customer = null;
 const authentication = async (req, res, next) => {
-	console.log(req.query);
-	// if (!token) token = req.query.token;
 	token = req.query.token;
 	if (token) {
 		try {
@@ -176,12 +174,10 @@ app.post('/login', async (req, res) => {
 		const id = customer ? resultUsers[0].customer_id : resultUsers[0].employee_id;
 		await query(`INSERT INTO tokens(customer, user_id, last_used) VALUES(${userType}, ${id}, now());`);
 
-		const resultTokens = await query(
-			`SELECT * FROM tokens WHERE user_id = ${id} and minute(last_used) = minute(curtime());`
-		);
+		const resultTokens = await query(`SELECT * FROM tokens WHERE user_id = ${id};`);
 		auth_id = resultTokens[0].user_id;
 
-		res.redirect(`/?token=${resultTokens[0].token}`);
+		res.redirect(`/?token=${resultTokens[resultTokens.length - 1].token}`);
 	} catch (err) {
 		console.log(err);
 		res.sendFile(path.join(__dirname, 'pages', 'login.html'));
@@ -288,9 +284,9 @@ app.post('/submitorder', async (req, res) => {
 			);
 
 			await query(
-				`UPDATE orders SET completed_at=ADDTIME(now(), "${
-					timeMinutes * 100
-				}") WHERE minute(created_at) = minute(curtime()) and customer_id=${auth_id};`
+				`UPDATE orders SET completed_at=ADDTIME(now(), "${timeMinutes * 100}") WHERE order_id = ${
+					result[result.length - 1].order_id
+				} and customer_id=${auth_id};`
 			);
 
 			res.send('Completed');
