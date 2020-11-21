@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+    mongo_database:
+        build: ./database
+        container_name: dbPartD
+        ports:
+            - '27017:27017'
+        environment:
+            MYSQL_ROOT_PASSWORD: admin
+            MYSQL_DATABASE: coffeeShopPartA
+        networks:
+            - mern-app
+
+    node_server:
+        build: ./server
+        depends_on:
+            - mongo_database
+        container_name: nodePartD
+        ports:
+            - '80:8888'
+        volumes:
+            - ./server:/usr/src/app
+        networks:
+            - mern-app
+
+    react_browser:
+        build: ./browser
+        stdin_open: true
+        depends_on:
+            - node_server
+        container_name: reactPartD
+        ports:
+            - '3000:3000'
+        volumes:
+            - ./browser:/usr/src/app
+        networks:
+            - mern-app
+
+networks:
+    mern-app:
+        driver: bridge
