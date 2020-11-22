@@ -5,12 +5,11 @@
 
 // Modules and packages
 import express, { Application, Request, Response, NextFunction } from 'express';
-import mongoose, { Collection, mongo } from 'mongoose';
+import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import { menu, users, orders } from './schemas';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-import { maxHeaderSize } from 'http';
 
 // Port and Host
 const PORT = 5000;
@@ -27,16 +26,6 @@ mongoose
 	.catch((err) => console.log(err));
 const conn: mongoose.Connection = mongoose.connection;
 conn.on('error', (err) => console.error(err));
-conn.on('open', () => {
-	console.log(`${database} Opened`);
-	conn.db.listCollections().toArray((err, collections) => {
-		if (err) throw err;
-		['menu', 'users', 'orders', 'tokens'].forEach((collection) => {
-			// if (!(collections.map(col => col.name).indexOf(collection) >= 0))
-		});
-		console.log(collections);
-	});
-});
 
 // ######################################################################################################################################
 
