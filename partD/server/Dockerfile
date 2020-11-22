@@ -8,6 +8,6 @@ WORKDIR /usr/src/app
 
 # COPY . .
 
-EXPOSE 8888
+EXPOSE 5000
 
 CMD ["npm", "run", "start"]
