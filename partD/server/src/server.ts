@@ -21,7 +21,7 @@ const HOST = '0.0.0.0';
 const container: string = 'localhost';
 const database: string = 'coffeeShop';
 mongoose
-	.connect(`mongodb://${container}:27017/${database}`, { useNewUrlParser: true })
+	.connect(`mongodb://${container}:27017/${database}`, { useNewUrlParser: true, useUnifiedTopology: true })
 	.then(() => console.log(`Connected to MongoDB Database ${database} on ${container}`))
 	.catch((err) => console.log(err));
 const conn: mongoose.Connection = mongoose.connection;
