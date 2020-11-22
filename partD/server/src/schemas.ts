@@ -50,21 +50,21 @@ interface UsersDoc extends mongoose.Document {
 
 const ordersSchema = new Schema(
 	{
-		customer: {
-			first_name: String,
-			last_name: String,
-			customer_id: Types.ObjectId,
-		},
+		first_name: String,
+		last_name: String,
+		customer_id: Types.ObjectId,
 		items: [
 			{
 				item_id: Types.ObjectId,
+				name: String,
 				quantity: Number,
+				price: Number,
 			},
 		],
+		cost: Number,
 		cancelled: Boolean,
 		created_at: Date,
 		finished_at: Date,
-		completed: Boolean,
 		notified_customer: Boolean,
 	},
 	{
@@ -73,21 +73,21 @@ const ordersSchema = new Schema(
 );
 
 interface OrdersDoc extends mongoose.Document {
-	customer: {
-		first_name: string;
-		last_name: string;
-		customer_id: Types.ObjectId;
-	};
+	first_name: string;
+	last_name: string;
+	customer_id: Types.ObjectId;
 	items: [
 		{
 			item_id: Types.ObjectId;
+			name: string;
 			quantity: number;
+			price: number;
 		}
 	];
+	cost: number;
 	cancelled: boolean;
 	created_at: Date;
 	finished_at: Date;
-	completed: boolean;
 	notified_customer: boolean;
 }
 

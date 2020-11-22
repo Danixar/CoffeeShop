@@ -10,6 +10,7 @@ import bodyParser from 'body-parser';
 import { menu, users, orders } from './schemas';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
+import { maxHeaderSize } from 'http';
 
 // Port and Host
 const PORT = 5000;
@@ -103,8 +104,7 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
 app.use(verifyToken);
 const authenticate = async (token: string) => {
 	const decoded: any = jwt.verify(token, 'secretKey');
-	if (decoded.user) return decoded.user;
-	else return null;
+	return decoded?.user;
 };
 
 // // ######################################################################################################################################
@@ -146,7 +146,12 @@ app.post('/login', async (req, res) => {
 			if (bcrypt.compare(password, matchedUser.password)) {
 				const token = await jwt.sign(
 					{
-						user: { _id: matchedUser._id, customer: matchedUser.customer },
+						user: {
+							_id: matchedUser._id,
+							first_name: matchedUser.first_name,
+							last_name: matchedUser.last_name,
+							customer: matchedUser.customer,
+						},
 						exp: Math.floor(Date.now() / 1000) + 60 * 60,
 					},
 					'secretKey'
@@ -226,19 +231,18 @@ app.post('/register', async (req, res) => {
 // // ######################################################################################################################################
 // // Customers
 
-// // GET menu items
-// app.get('/menu', async (req, res) => {
-// 	try {
-// 		const result = await query(`SELECT * FROM menu_items WHERE removed = 0;`);
-// 		res.send(result);
-// 	} catch (err) {
-// 		res.status(500).send('Failed to get menu items');
-// 	}
-// });
+// GET menu items
+app.get('/menu', async (req, res) => {
+	try {
+		const result = await menu.find();
+		res.status(200).json(result);
+	} catch (err) {
+		res.status(500).send('Failed to get menu items');
+	}
+});
 
 // // GET order page
 // app.get('/customerorders', (req, res) => {
-// 	console.log(token, auth_id, customer);
 // 	if (auth_id === null) res.redirect(`/login?token=${token}`);
 // 	else if (auth_id !== null && !customer) {
 // 		res.redirect(`/employeerevoked?token=${token}`);
@@ -255,120 +259,125 @@ app.post('/register', async (req, res) => {
 // 	else red.sendFile(path.join(__dirname, 'pages', 'past-orders.html'));
 // });
 
-// // POST new order
-// app.post('/submitorder', async (req, res) => {
-// 	const items = Object.values(req.body);
-// 	console.log(token, auth_id, customer);
-// 	if (auth_id !== null && customer) {
-// 		try {
-// 			await query(`INSERT INTO orders(customer_id, created_at) VALUES (${auth_id}, now());`);
+// POST new order
+app.post('/submitorder', async (req, res) => {
+	const user = await authenticate(req.token);
+	const items = Object.values(req.body);
 
-// 			const result = await query(`SELECT * FROM orders WHERE customer_id=${auth_id};`);
+	if (user && items) {
+		try {
+			// Get the items in the order
+			let timeRequired = 0;
+			let cost = 0;
+			const foundItems = await Promise.all(
+				items.map(async (item: any) => {
+					const id = item.split('_')[0];
+					const quantity = item.split('_')[1];
+					const foundItem = await menu.findById(id);
+					if (foundItem) {
+						cost += foundItem.price * quantity;
+						if (foundItem.time_required > timeRequired) timeRequired = foundItem.time_required;
+						return {
+							item_id: foundItem._id,
+							name: foundItem.name,
+							quantity: quantity,
+							price: foundItem.price,
+						};
+					}
+					return null;
+				})
+			);
 
-// 			let timeMinutes = 0;
-// 			await Promise.all(
-// 				items.map(async (item) => {
-// 					let itemName = item.split('_')[0];
-// 					let quantity = item.split('_')[1];
-// 					await query(
-// 						`INSERT INTO ordered_items(menu_id, order_id, quantity) VALUES (${itemName}, ${
-// 							result[result.length - 1].order_id
-// 						}, ${quantity});`
-// 					);
+			// Get Time required for order
+			let completionTime = new Date();
+			completionTime.setMinutes(completionTime.getMinutes() + timeRequired);
 
-// 					const menu_item = await query(`SELECT * FROM menu_items WHERE menu_id=${itemName};`);
-// 					console.log(menu_item[0].time_required);
-// 					if (menu_item[0].time_required > 0) timeMinutes = menu_item[0].time_required;
-// 				})
-// 			);
+			// Place the Order
+			const order = new orders({
+				first_name: user.first_name,
+				last_name: user.second_name,
+				customer_id: user._id,
+				items: foundItems.filter(Boolean).map((item) => {
+					if (item)
+						return {
+							item_id: item.item_id,
+							name: item.name,
+							quantity: item.quantity,
+							price: item.price,
+						};
+				}),
+				cost: cost,
+				cancelled: false,
+				created_at: new Date(),
+				finished_at: completionTime,
+				notified_customer: false,
+			});
+			await order.save();
+			res.status(201).send();
+		} catch (err) {
+			console.error(err);
+			res.status(500).send();
+		}
+	} else res.status(400).send();
+});
 
-// 			await query(
-// 				`UPDATE orders SET completed_at=ADDTIME(now(), "${timeMinutes * 100}") WHERE order_id = ${
-// 					result[result.length - 1].order_id
-// 				} and customer_id=${auth_id};`
-// 			);
+// GET past orders of a customer
+app.get('/getorders', async (req, res) => {
+	const user = await authenticate(req.token);
 
-// 			res.send('Completed');
-// 		} catch (err) {
-// 			console.log(err);
-// 			res.status(500).send('Invalid Input Parameters');
-// 		}
-// 	} else if (auth_id !== null && !customer) {
-// 		res.send('Employees Cannot submit an order');
-// 	} else res.status(400).send('Failed to submit order');
-// });
+	if (user) {
+		try {
+			const usersPastOrders = await orders.find({ customer_id: user._id });
+			res.status(200).json(usersPastOrders);
+		} catch (err) {
+			console.error(err);
+			res.status(500).send();
+		}
+	}
+	res.status(400).send();
+});
 
-// const check = async (order_id) => {
-// 	const result = await query(`SELECT * FROM orders WHERE order_id = ${order_id};`);
-// 	const resultItems = await query(`SELECT * FROM ordered_items WHERE order_id = ${order_id};`);
-// 	const items = await Promise.all(
-// 		resultItems.map(async (item) => {
-// 			let itemCheck = await query(`SELECT * FROM menu_items WHERE menu_id=${item.menu_id};`);
-// 			let firstItem = itemCheck[0];
-// 			firstItem['quantity'] = item.quantity;
-// 			return firstItem;
-// 		})
-// 	);
-// 	const order = {
-// 		order_id: order_id,
-// 		finished: result[0].completed_at < new Date() || result[0].cancelled == 1,
-// 		created: result[0].created_at,
-// 		cancelled: result[0].cancelled == 1,
-// 		cost: items
-// 			.map((item) => item.price * item.quantity)
-// 			.reduce((acc, cur) => acc * 1.15 + cur)
-// 			.toFixed(2),
-// 		items: items.map((item) => ' ' + item.quantity + ' ' + item.name),
-// 	};
+// POST check past order
+app.post('/checkorder', async (req, res) => {
+	const user = await authenticate(req.token);
+	const order_id = req.body.order_id;
 
-// 	return order;
-// };
+	if (user && order_id) {
+		try {
+			const pastOrder = await orders.findOne({ _id: order_id, customer_id: user._id });
+			if (pastOrder) res.status(200).json(pastOrder);
+		} catch (err) {
+			console.error(err);
+			res.status(500).send();
+		}
+	}
+	res.status(400).send();
+});
 
-// // GET past orders
-// app.get('/getorders', async (req, res) => {
-// 	if (auth_id) {
-// 		try {
-// 			const sql = customer
-// 				? `SELECT * FROM orders WHERE customer_id = ${auth_id} ORDER BY created_at DESC;`
-// 				: `SELECT * FROM orders WHERE completed_at <= now() ORDER BY created_at ASC;`;
-// 			const result = await query(sql);
-// 			const items = await Promise.all(result.map(async (item) => await check(item.order_id)));
+// POST Cancel past order
+app.post('/cancelorder', async (req, res) => {
+	const user = await authenticate(req.token);
+	const order_id = req.body.order_id;
 
-// 			res.send(items);
-// 		} catch (err) {
-// 			console.log(err);
-// 			res.status(500).send('Failed to get orders');
-// 		}
-// 	} else res.status(400).send('Invalid Permission');
-// });
-
-// // POST check past order
-// app.post('/checkorder', async (req, res) => {
-// 	const order_id = req.body.order_id;
-// 	if (auth_id) {
-// 		try {
-// 			const order = await check(order_id);
-// 			res.send(order);
-// 		} catch (err) {
-// 			console.log(err);
-// 			res.status(500).send('Could not find order');
-// 		}
-// 	} else res.status(400).send('Invalid Permission');
-// });
-
-// // POST Cancel past order
-// app.post('/cancelorder', async (req, res) => {
-// 	let order_id = req.body.order_id;
-// 	if (auth_id) {
-// 		try {
-// 			await query(`UPDATE orders SET cancelled=1 WHERE order_id = ${order_id} LIMIT 1;`);
-// 			res.send(`Succesfully cancelled order: ${order_id}`);
-// 		} catch (err) {
-// 			console.log(err);
-// 			res.status(500).send('Could not find order');
-// 		}
-// 	} else res.status(400).send('Invalid Permission');
-// });
+	if (user && order_id) {
+		try {
+			await orders.updateOne(
+				{ _id: order_id, customer_id: user._id },
+				{
+					$set: {
+						cancelled: true,
+						completed: true,
+					},
+				}
+			);
+			res.status(200).send();
+		} catch (err) {
+			console.error(err);
+			res.status(500).send();
+		}
+	}
+	res.status(400).send();
+});
 
 // // ######################################################################################################################################
 // // Employees
@@ -386,162 +395,128 @@ app.post('/register', async (req, res) => {
 // 	res.sendFile(path.join(__dirname, 'pages', 'customer-revoked.html'));
 // });
 
-// // const createMenu = async () => {
-// // 	const sql = `CREATE TABLE IF NOT EXISTS menu_items(
-// //         menu_id int NOT NULL AUTO_INCREMENT,
-// //         employee_id int,
-// //         name VARCHAR(50) NOT NULL,
-// //         size VARCHAR(50) NOT NULL,
-// //         price NUMERIC NOT NULL,
-// //         time_required TIME NOT NULL,
-// //         description VARCHAR(50), c
-// //         reated_at TIMESTAMP,
-// //         PRIMARY KEY (menu_id)
-// //         );`;
-// // 	await query(sql);
-// // };
+// POST add menu item
+app.post('/addmenuitem', async (req, res) => {
+	const name = req.body.name;
+	const size = req.body.size;
+	const price = req.body.price;
+	const time_required = req.body.time_required;
+	const description = req.body.description;
+	if (!name || !size || !price || !time_required || !description) res.status(400).send();
 
-// // // POST create menu
-// // app.post('/createmenu', async (req, res) => {
-// // 	if (auth_id && !customer) {
-// // 		try {
-// // 			const sql = `CREATE TABLE IF NOT EXISTS menu_items(
-// //                     menu_id int NOT NULL AUTO_INCREMENT,
-// //                     employee_id int,
-// //                     name VARCHAR(50) NOT NULL,
-// //                     size VARCHAR(50) NOT NULL,
-// //                     price NUMERIC NOT NULL,
-// //                     time_required TIME NOT NULL,
-// //                     description VARCHAR(50), c
-// //                     reated_at TIMESTAMP,
-// //                     PRIMARY KEY (menu_id)
-// //                     );`;
-// // 			await query(sql);
-// // 			res.send('Created Menu');
-// // 		} catch (err) {
-// // 			console.log(err);
-// // 			res.status(500).send('Failed to create menu');
-// // 		}
-// // 	} else res.status(400).send('Improper access permissions');
-// // });
+	const user = await authenticate(req.token);
 
-// // // POST delete menu
-// // app.post('/deletemenu', async (req, res) => {
-// // 	if (auth_id && !customer) {
-// // 		try {
-// // 			await query(`DROP TABLE menu_items;`);
-// // 			await query(`UPDATE orders SET cancelled = 1;`);
-// // 			await query(`TRUNCATE TABLE ordered_items;`);
-// // 			await createMenu(); // Create new empty menu
-// // 			res.send('Deleted Menu');
-// // 		} catch (err) {
-// // 			console.log(err);
-// // 			res.status(500).send('Failed to delete menu');
-// // 		}
-// // 	} else res.status(400).send('Improper access permissions');
-// // });
+	if (user) {
+		try {
+			const usersPastOrders = await orders.find({ customer_id: user._id });
+			const menuItem = new menu({
+				name: name,
+				size: size,
+				price: price,
+				time_required: time_required,
+				description: description,
+				removed: false,
+				date: new Date(),
+			});
+			await menuItem.save();
+			res.status(201).send();
+		} catch (err) {
+			console.error(err);
+			res.status(500).send();
+		}
+	}
+	res.status(400).send();
+});
 
-// // POST add menu item
-// app.post('/addmenuitem', async (req, res) => {
-// 	const name = req.body.name;
-// 	const size = req.body.size;
-// 	const price = req.body.price;
-// 	const time_required = req.body.time_required;
-// 	const description = req.body.description;
+// POST delete menu item
+app.post('/deletemenuitem', async (req, res) => {
+	const menu_id = req.body.menu_id;
+	const user = await authenticate(req.token);
 
-// 	if (!name || !size || !price || !time_required || !description) res.status(400).send('Invalid Fields');
+	if (user && menu_id) {
+		try {
+			await menu.deleteOne({ _id: menu_id });
+			res.status(200).send();
+		} catch (err) {
+			console.error(err);
+			res.status(500).send();
+		}
+	}
+	res.status(400).send();
+});
 
-// 	if (auth_id && !customer) {
-// 		try {
-// 			await query(
-// 				`INSERT INTO menu_items(name, size, price, time_required, description) VALUES ('${name}', '${size}', ${price}, ${time_required}, '${description}');`
-// 			);
-// 			res.send(`Added menu item ${name} ${size}`);
-// 		} catch (err) {
-// 			console.log(err);
-// 			res.status(500).send('Failed to add menu item');
-// 		}
-// 	} else res.status(400).send('Improper access permissions');
-// });
+// GET all open orders
+app.get('/allopenorders', async (req, res) => {
+	const user = await authenticate(req.token);
 
-// // POST delete menu item
-// app.post('/deletemenuitem', async (req, res) => {
-// 	const menu_id = req.body.menu_id;
-// 	if (auth_id && !customer) {
-// 		try {
-// 			const result = await query(`SELECT * FROM menu_items WHERE menu_id = ${menu_id};`);
+	if (user) {
+		try {
+			const allOpenOrders = await orders
+				.find({ cancelled: false, finished_at: { $gt: new Date() } })
+				.sort({ created_at: -1 });
+			res.status(200).json(allOpenOrders);
+		} catch (err) {
+			console.error(err);
+			res.status(500).send();
+		}
+	}
+	res.status(400).send();
+});
 
-// 			await query(`UPDATE menu_items SET removed = 1 WHERE menu_id = ${result[0].menu_id};`);
+// GET all completed orders that the customer hasn't recieved yet
+app.get('/allcompletedorders', async (req, res) => {
+	const user = await authenticate(req.token);
 
-// 			res.send('Deleted Menu Item');
-// 		} catch (err) {
-// 			console.log(err);
-// 			res.status(500).send('Failed to delete menu item');
-// 		}
-// 	} else res.status(400).send('Improper access permissions');
-// });
+	if (user) {
+		try {
+			const allCompletedOrders = await orders
+				.find({ cancelled: false, notified_customer: false, finished_at: { $lt: new Date() } })
+				.sort({ created_at: -1 });
+			res.status(200).json(allCompletedOrders);
+		} catch (err) {
+			console.error(err);
+			res.status(500).send();
+		}
+	}
+	res.status(400).send();
+});
 
-// // GET all open orders
-// app.get('/allopenorders', async (req, res) => {
-// 	if (auth_id && !customer) {
-// 		try {
-// 			const result = await query(
-// 				`SELECT * FROM orders WHERE completed_at > CURDATE() AND cancelled = 0 ORDER BY created_at DESC;`
-// 			);
-// 			const orders = await Promise.all(result.map(async (item) => await check(item.order_id)));
-// 			res.send(orders);
-// 		} catch (err) {
-// 			console.log(err);
-// 			res.status(500).send('Failed to get orders');
-// 		}
-// 	} else res.status(400).send('Improper access permissions');
-// });
+// POST order ready for pickup/notifying customer
+app.post('/informcustomer', async (req, res) => {
+	const user = await authenticate(req.token);
+	const order_id = req.body.order_id;
 
-// // GET all completed orders
-// app.get('/allcompletedorders', async (req, res) => {
-// 	if (auth_id && !customer) {
-// 		try {
-// 			const result = await query(
-// 				`SELECT * FROM orders WHERE completed_at <= CURDATE() AND cancelled = 0 ORDER BY created_at DESC;`
-// 			);
-// 			const orders = await Promise.all(result.map(async (item) => await check(item.order_id)));
-// 			res.send(orders);
-// 		} catch (err) {
-// 			console.log(err);
-// 			res.status(500).send('Failed to get orders');
-// 		}
-// 	} else res.status(400).send('Improper access permissions');
-// });
+	if (user && order_id) {
+		try {
+			await orders.updateOne(
+				{ _id: order_id },
+				{
+					$set: {
+						notified_customer: true,
+					},
+				}
+			);
+			res.status(200).json();
+		} catch (err) {
+			console.error(err);
+			res.status(500).send();
+		}
+	}
+	res.status(400).send();
+});
 
-// // POST order ready for pickup
-// app.post('/informcustomer', async (req, res) => {
-// 	try {
-// 		const order_id = req.body.order_id;
-// 		const result = await query(`SELECT * FROM orders WHERE order_id = ${order_id};`);
-// 		const customer_id = result[0].customer_id;
-// 		const customer = await query(`SELECT * FROM customers WHERE customer_id = ${customer_id}`);
-// 		const name = `${customer[0].first_name} ${customer[0].last_name}`;
-// 		await query(
-// 			`INSERT INTO ready_orders (customer_id, name, order_id, posted) VALUES (${customer_id}, "${name}", ${result[0].order_id}, now())`
-// 		);
-// 		res.send('Customer Informed');
-// 	} catch (err) {
-// 		console.log(err);
-// 		res.status(500).send('Failed to inform customer');
-// 	}
-// });
-
-// // GET all orders ready for pickup
-// app.get('/ordersready', async (req, res) => {
-// 	try {
-// 		await query(`DELETE FROM ready_orders WHERE HOUR(now()) != HOUR(posted)`);
-// 		const result = await query(`SELECT * FROM ready_orders;`);
-// 		res.send(result);
-// 	} catch (err) {
-// 		console.log(err);
-// 		res.status(500).send('Failed to get orders');
-// 	}
-// });
+// GET all orders ready for pickup
+app.get('/ordersready', async (req, res) => {
+	try {
+		const allReadyOrders = await orders
+			.find({ cancelled: false, notified_customer: true })
+			.sort({ created_at: -1 });
+		res.status(200).json(allReadyOrders);
+	} catch (err) {
+		console.error(err);
+		res.status(500).send();
+	}
+});
 
 // ######################################################################################################################################
 
