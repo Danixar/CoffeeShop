@@ -10,6 +10,7 @@ import bodyParser from 'body-parser';
 import { menu, users, orders } from './schemas';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
+import cors from 'cors';
 
 // Port and Host
 const PORT = 5000;
@@ -35,43 +36,8 @@ const app: Application = express();
 // Body Parser Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/', async (req: Request, res: Response) => {
-	try {
-		const menuItems = await menu.find();
-		console.log(menuItems);
-		res.json(menuItems);
-	} catch (err) {
-		res.status(500).json({ message: 'error!' });
-	}
-});
-
-app.post('/test', async (req: Request, res: Response) => {
-	try {
-		const name = 'test';
-		const size = 'Test';
-		const price = 19.99;
-		const time_required = 10;
-		const description = 'test';
-		const removed = false;
-		const date = new Date();
-
-		const item = new menu({
-			name: name,
-			size: size,
-			price: price,
-			time_required: time_required,
-			description: description,
-			removed: removed,
-			date: date,
-		});
-
-		const newItem = await item.save();
-		console.log(newItem);
-		res.status(201).json(newItem);
-	} catch (err) {
-		res.status(500).json({ message: 'error!' });
-	}
-});
+// CORS Middleware
+app.use(cors());
 
 // // HTML files for testing post forms
 // app.use('/', express.static(path.join(__dirname, 'pages')));

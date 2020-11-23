@@ -40,7 +40,7 @@ db.orders.insert({
     customer: {
         first_name: 'Tim',
         last_name: 'Eric',
-        customer_id = Object('blah1243546676')
+        customer_id: Object('blah1243546676')
     },
     items: [
         {
