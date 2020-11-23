@@ -1,18 +1,30 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 // import './App.css';
 import './style/style.css';
 import { BrowserRouter, Route, Link } from 'react-router-dom';
 
-import { useState } from 'react';
-
 import { Menu, Order, User } from './components/interfaces';
 import { Landing } from './components/Landing';
+import { Customers } from './components/Customers';
+import { Employees } from './components/Employees';
+import { Login } from './components/Login';
+import { Register } from './components/Register';
 
 const App: React.FC = () => {
 	const [getToken, setToken] = useState<string | null>(null);
 	const [getMenu, setMenu] = useState<Menu[]>([]);
-	const [getReadyOrders, setReadyOrders] = useState<Order[]>([]);
+
+	// useEffect(() => {
+	// 	console.log('Hi There');
+	// 	if (getMenu.length < 1)
+	// 		fetch('http://localhost:5000/menu')
+	// 			.then((res) => res.json())
+	// 			.then((res) => {
+	// 				console.log('hi');
+	// 				setMenu(res);
+	// 			});
+	// }, [getMenu]);
 
 	return (
 		<div className="App">
@@ -45,14 +57,20 @@ const App: React.FC = () => {
 							<button className="button"> Register </button>{' '}
 						</Link>
 						<Route path="/" exact>
-							<Landing setMenu={setMenu} setReadyOrders={setReadyOrders} />
+							<Landing getMenu={getMenu} />
 						</Route>
-						{/* <Route path="/oldPosts">
-							<OldPosts get={getList} />
+						<Route path="/customers">
+							<Customers />
 						</Route>
-						<Route path="/newPost">
-							<NewPost set={setList} />
-						</Route> */}
+						<Route path="/employees">
+							<Employees />
+						</Route>
+						<Route path="/login">
+							<Login />
+						</Route>
+						<Route path="/register">
+							<Register />
+						</Route>
 					</BrowserRouter>
 				</div>
 			</header>

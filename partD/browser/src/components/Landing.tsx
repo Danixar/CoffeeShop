@@ -1,19 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Menu, Order } from './interfaces';
 
 interface Props {
-	setMenu: React.Dispatch<React.SetStateAction<Menu[]>>;
-	setReadyOrders: React.Dispatch<React.SetStateAction<Order[]>>;
+	getMenu: Menu[];
 }
 
-export const Landing: React.FC<Props> = ({ setMenu, setReadyOrders }) => {
-	// fetch('http://localhost:5000/menu')
-	// 	.then((res) => res.json())
-	// 	.then((res) => {
-	// 		console.log('hi');
-	// 		setMenu(res);
-	// 	});
+export const Landing: React.FC<Props> = ({ getMenu }) => {
+	const [getReadyOrders, setReadyOrders] = useState<Order[]>([]);
+
+	// useEffect(() => {
+	// 	console.log('Hi There readt');
+	// 	fetch('http://localhost:5000/ordersready')
+	// 		.then((res) => res.json())
+	// 		.then((res) => {
+	// 			console.log('hi ready');
+	// 			setReadyOrders(res);
+	// 		});
+	// }, [getReadyOrders]);
 
 	return (
 		<>
