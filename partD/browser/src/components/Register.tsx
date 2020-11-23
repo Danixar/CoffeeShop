@@ -12,36 +12,41 @@ export const Register: React.FC = () => {
 		<>
 			<div className="container">
 				<section id="center">
-					<h3>Register</h3>
+					<h1>Register</h1>
 					<form action="/register" method="POST">
-						{/* <div>
-						<label for="first_name">First Name: </label>
-						<input type="text" id="first_name" name="first_name" />
-						<br />
-						<label for="last_name">Last Name: </label>
-						<input type="text" id="last_name" name="last_name" required />
-					</div>
-					<div>
-						<label for="email">Email: </label>
-						<input type="text" name="email" id="email" required />
-					</div>
-					<div>
-						<label for="password">Password: </label>
-						<input type="password" name="password" id="password" required />
-					</div>
-					<div>
-						<label for="customer">Customer: </label>
-						<input type="radio" name="user" id="customer" value="1" checked="checked" />
-						<label for="employee">Employee: </label>
-						<input type="radio" name="user" id="employee" value="0" />
-					</div> */}
+						<div>
+							<label>First Name: </label>
+							<input type="text" id="first_name" name="first_name" />
+							<br />
+							<label>Last Name: </label>
+							<input type="text" id="last_name" name="last_name" required />
+						</div>
+						<div>
+							<label>Email: </label>
+							<input type="text" name="email" id="email" required />
+						</div>
+						<div>
+							<label>Password: </label>
+							<input type="password" name="password" id="password" required />
+						</div>
+						<div>
+							<label>Customer: </label>
+							<input type="radio" name="user" id="customer" value="1" checked={true} />
+							<label>Employee: </label>
+							<input type="radio" name="user" id="employee" value="0" />
+						</div>
 						<button type="submit" id="register">
 							Register
 						</button>
 					</form>
-					<a href="/">Cancel</a> <br />
-					<a href="/login">Login</a>
+					<a href="/login">Have an account already? Login</a>
 				</section>
+
+				<nav className="sectionEnd">
+					<div className="container">
+						<br />
+					</div>
+				</nav>
 			</div>
 		</>
 	);

@@ -19,11 +19,7 @@ export const Employees: React.FC = () => {
 
 				<nav className="sectionEnd">
 					<div className="container">
-						{/* <ul>
-						<li>
-							<a href="#menu" onclick="deleteSelected()">Delete Selected Items</a>
-						</li>
-					</ul> */}
+						<button className="button1"> Delete Selected Items </button>{' '}
 					</div>
 				</nav>
 
@@ -32,28 +28,24 @@ export const Employees: React.FC = () => {
 				<section>
 					<h3>Add New Item</h3>
 					<fieldset>
-						{/* <label for="name">Name </label>
+						<label>Name </label>
 						<input type="text" name="name" id="i1" value="Orange Mocha Frappucino" /> <br />
-						<label for="size">Size </label>
+						<label>Size </label>
 						<input type="text" name="size" id="i2" value="Tio Grande" /> <br />
-						<label for="price">Price </label>
+						<label>Price </label>
 						<input type="number" name="price" id="i3" value="19.99" /> <br />
-						<label for="time">Time Required </label>
+						<label>Time Required </label>
 						<input type="number" name="time" id="i4" value="5" /> <br />
-						<label for="description">Description </label> <br />
-						<textarea name="data" id="i5" cols="70" rows="5">
+						<label>Description </label>
+						<textarea name="data" id="i5" cols={40} rows={2}>
 							Caffeine
-						</textarea> */}
+						</textarea>
 					</fieldset>
 				</section>
 
 				<nav className="sectionEnd">
 					<div className="container">
-						{/* <ul>
-						<li>
-							<a href="#menu" onclick="addItem()">Add New Item to Menu</a>
-						</li>
-					</ul> */}
+						<button className="button1"> Add New Item to Menu </button>{' '}
 					</div>
 				</nav>
 
@@ -62,6 +54,12 @@ export const Employees: React.FC = () => {
 					<p id="openorders">There are no open Orders</p>
 				</section>
 
+				<nav className="sectionEnd">
+					<div className="container">
+						<br />
+					</div>
+				</nav>
+
 				<section>
 					<h3>All Ready Orders</h3>
 					<p id="readyorders">There are no ready Orders</p>
@@ -69,13 +67,7 @@ export const Employees: React.FC = () => {
 
 				<nav className="sectionEnd">
 					<div className="container">
-						<ul>
-							{/* <li>
-								<a href="#menu" onclick="informCustomer()">
-									Inform Selected Customers their Orders are Ready
-								</a>
-							</li> */}
-						</ul>
+						<button className="button1"> Inform Selected Customers their Orders are Ready </button>{' '}
 					</div>
 				</nav>
 			</div>

@@ -20,11 +20,7 @@ export const Customers: React.FC = () => {
 
 				<nav className="sectionEnd">
 					<div className="container">
-						<ul>{/* <li>
-								<a href="#navbar" onclick="submitOrder()">
-									Submit new Order
-								</a>
-							</li> */}</ul>
+						<button className="button1"> Submit New Order </button>{' '}
 					</div>
 				</nav>
 
@@ -35,11 +31,7 @@ export const Customers: React.FC = () => {
 
 				<nav className="sectionEnd">
 					<div className="container">
-						<ul>{/* <li>
-								<a href="#navbar" onclick="cancelOrders()">
-									Cancel Selected Orders
-								</a>
-							</li> */}</ul>
+						<button className="button1"> Cancel Selected Orders </button>{' '}
 					</div>
 				</nav>
 			</div>

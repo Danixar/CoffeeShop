@@ -17,14 +17,13 @@ const App: React.FC = () => {
 
 	// useEffect(() => {
 	// 	console.log('Hi There');
-	// 	if (getMenu.length < 1)
-	// 		fetch('http://localhost:5000/menu')
-	// 			.then((res) => res.json())
-	// 			.then((res) => {
-	// 				console.log('hi');
-	// 				setMenu(res);
-	// 			});
-	// }, [getMenu]);
+	// 	fetch('http://localhost:5000/menu')
+	// 		.then((res) => res.json())
+	// 		.then((res) => {
+	// 			console.log(res);
+	// 			setMenu(res);
+	// 		});
+	// }, []);
 
 	return (
 		<div className="App">

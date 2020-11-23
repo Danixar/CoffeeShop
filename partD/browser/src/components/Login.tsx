@@ -12,28 +12,34 @@ export const Login: React.FC = () => {
 		<>
 			<div className="container">
 				<section id="center">
-					<h3>Login</h3>
+					<h1>Login</h1>
 					<form action="/login" method="POST">
-						{/* <div>
-							<label for="email">Email: </label>
+						<div>
+							<label>Email: </label>
 							<input type="text" name="email" id="email" />
 						</div>
 						<div>
-							<label for="password">Password: </label>
+							<label>Password: </label>
 							<input type="password" name="password" id="password" />
 						</div>
 						<div>
-							<label for="customer">Customer: </label>
-							<input type="radio" name="user" id="customer" value="1" checked="checked" />
-							<label for="employee">Employee: </label>
+							<label>Customer: </label>
+							<input type="radio" name="user" id="customer" value="1" checked={true} />
+							<label>Employee: </label>
 							<input type="radio" name="user" id="employee" value="0" />
-						</div> */}
+						</div>
 						<button type="submit" id="login">
 							Login
 						</button>
 					</form>
 					<a href="/register">Don't have an account? Register</a>
 				</section>
+
+				<nav className="sectionEnd">
+					<div className="container">
+						<br />
+					</div>
+				</nav>
 			</div>
 		</>
 	);
