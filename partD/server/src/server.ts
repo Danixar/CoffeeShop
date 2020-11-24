@@ -111,15 +111,6 @@ app.post('/login', async (req, res) => {
 					},
 					'secretKey'
 				);
-				// const submittingToken = new tokens({
-				// 	user: {
-				// 		user_id: matchedUser._id,
-				// 		customer: matchedUser.customer,
-				// 	},
-				// 	token: token,
-				// 	last_used: new Date(),
-				// });
-				// await submittingToken.save();
 
 				res.status(202).json(token);
 				return false;
@@ -461,7 +452,7 @@ app.post('/informcustomer', async (req, res) => {
 });
 
 // GET all orders ready for pickup
-app.get('/ordersready', async (req, res) => {
+app.get('/readyorders', async (req, res) => {
 	try {
 		const allReadyOrders = await orders
 			.find({ cancelled: false, notified_customer: true })

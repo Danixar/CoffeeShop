@@ -10,20 +10,30 @@ import { Customers } from './components/Customers';
 import { Employees } from './components/Employees';
 import { Login } from './components/Login';
 import { Register } from './components/Register';
+import { Lockout } from './components/Lockout';
 
 const App: React.FC = () => {
 	const [getToken, setToken] = useState<string | null>(null);
+	const [getLogin, setLogin] = useState<boolean>(false);
 	const [getMenu, setMenu] = useState<Menu[]>([]);
 
-	// useEffect(() => {
-	// 	console.log('Hi There');
-	// 	fetch('http://localhost:5000/menu')
-	// 		.then((res) => res.json())
-	// 		.then((res) => {
-	// 			console.log(res);
-	// 			setMenu(res);
-	// 		});
-	// }, []);
+	useEffect(() => {
+		fetch('http://localhost:5000/menu')
+			.then((res) => res.json())
+			.then((res) => {
+				setMenu(res);
+			});
+		if (getToken) setLogin(true);
+		else setLogin(false);
+	}, [getToken]);
+
+	useEffect(() => {
+		fetch('http://localhost:5000/menu')
+			.then((res) => res.json())
+			.then((res) => {
+				setMenu(res);
+			});
+	}, []);
 
 	return (
 		<div className="App">
@@ -59,11 +69,9 @@ const App: React.FC = () => {
 							<Landing getMenu={getMenu} />
 						</Route>
 						<Route path="/customers">
-							<Customers />
+							{getLogin ? <Customers getMenu={getMenu} getToken={getToken} /> : <Lockout />}
 						</Route>
-						<Route path="/employees">
-							<Employees />
-						</Route>
+						<Route path="/employees">{getLogin ? <Employees /> : <Lockout />}</Route>
 						<Route path="/login">
 							<Login />
 						</Route>

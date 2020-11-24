@@ -6,18 +6,55 @@ interface Props {
 	getMenu: Menu[];
 }
 
+const displayMenu = (getMenu: Menu[]) => {
+	// let count = 0;
+
+	if (getMenu.length === 0) return <div>No items on the Menu currently</div>;
+	else {
+		return getMenu.map((item) => {
+			// let position = 'left';
+			// if (count % 3 === 1) position = 'left';
+			// else if (count % 3 === 2) position = 'left';
+			// count++;
+			return (
+				<div className="itemContainer" style={{ float: 'left' }}>
+					<h4>{item.name}</h4>
+					<h5>{item.size}</h5>
+					<h5>{item.price}</h5>
+					<h5>{item.description}</h5>
+				</div>
+			);
+		});
+	}
+};
+
+const displayReadyOrders = (getReadyOrders: Order[]) => {
+	if (getReadyOrders.length === 0) return <div>No orders ready at the moment</div>;
+	else {
+		return getReadyOrders.map((order) => {
+			return (
+				<div className="itemContainer" style={{ float: 'left' }}>
+					<h4>
+						{order.first_name} {order.last_name}
+					</h4>
+					<h5>{order.created_at}</h5>
+					<h5>Ready for pickup!</h5>
+				</div>
+			);
+		});
+	}
+};
+
 export const Landing: React.FC<Props> = ({ getMenu }) => {
 	const [getReadyOrders, setReadyOrders] = useState<Order[]>([]);
 
-	// useEffect(() => {
-	// 	console.log('Hi There readt');
-	// 	fetch('http://localhost:5000/ordersready')
-	// 		.then((res) => res.json())
-	// 		.then((res) => {
-	// 			console.log('hi ready');
-	// 			setReadyOrders(res);
-	// 		});
-	// }, [getReadyOrders]);
+	useEffect(() => {
+		fetch('http://localhost:5000/readyorders')
+			.then((res) => res.json())
+			.then((res) => {
+				setReadyOrders(res);
+			});
+	}, []);
 
 	return (
 		<>
@@ -34,7 +71,7 @@ export const Landing: React.FC<Props> = ({ getMenu }) => {
 					</p>
 					<br />
 					<h3>Orders Ready for Pickup</h3>
-					<p id="readyorders">No Orders Ready at this time</p>
+					{displayReadyOrders(getReadyOrders)}
 				</section>
 			</div>
 
@@ -45,10 +82,9 @@ export const Landing: React.FC<Props> = ({ getMenu }) => {
 			</section>
 
 			<div className="container">
-				<section id="main">
+				<section>
 					<h1>Menu</h1>
-					<p id="menu">The menu is not available at this time.</p>
-					<p>*Taxes not included</p>
+					{displayMenu(getMenu)}
 				</section>
 			</div>
 
