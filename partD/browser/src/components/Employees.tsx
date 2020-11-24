@@ -5,9 +5,10 @@ import { Menu, Order } from './interfaces';
 interface Props {
 	getToken: string | null;
 	getMenu: Menu[];
+	setMenu: React.Dispatch<React.SetStateAction<Menu[]>>;
 }
 
-export const Employees: React.FC<Props> = ({ getToken, getMenu }) => {
+export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 	// const [getPastOrders, setPastOrders] = useState<Order[]>([]);
 	// const [getCurrentOrder, setCurrentOrder] = useState<ItemOrder[]>(
 	// 	getMenu.map((item) => {
@@ -35,7 +36,35 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu }) => {
 		}
 	};
 
-	const removeMenuItem = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {};
+	const removeMenuItem = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		const id = event.currentTarget.id;
+		if (getToken) {
+			fetch('http://localhost:5000/deletemenuitem', {
+				method: 'POST',
+				body: `menu_id=${id}`,
+				headers: new Headers({
+					Authorization: `Bearer ${getToken}`,
+					'Content-Type': 'application/x-www-form-urlencoded',
+				}),
+			})
+				.then((res) => {
+					if (res.status === 200) alert('Removed Item!');
+					else alert('Could not remove item!');
+					fetchMenu();
+				})
+				.catch((err) => {
+					console.error(err);
+				});
+		}
+	};
+
+	const fetchMenu = () => {
+		fetch('http://localhost:5000/menu')
+			.then((res) => res.json())
+			.then((res) => {
+				setMenu(res);
+			});
+	};
 
 	return (
 		<>

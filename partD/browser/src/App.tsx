@@ -87,7 +87,7 @@ const App: React.FC = () => {
 						</Route>
 						<Route path="/employees">
 							{getLogin && !getLogin.customer ? (
-								<Employees getMenu={getMenu} getToken={getToken} />
+								<Employees getMenu={getMenu} getToken={getToken} setMenu={setMenu} />
 							) : (
 								<Lockout />
 							)}
