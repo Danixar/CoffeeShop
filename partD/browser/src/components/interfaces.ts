@@ -1,4 +1,5 @@
 interface Menu {
+	_id: string;
 	name: string;
 	size: string;
 	price: number;
@@ -9,6 +10,7 @@ interface Menu {
 }
 
 interface User {
+	_id: string;
 	first_name: string;
 	last_name: string;
 	email: string;
@@ -18,6 +20,7 @@ interface User {
 }
 
 interface Order {
+	_id: string;
 	first_name: string;
 	last_name: string;
 	customer_id: string;

@@ -7,15 +7,9 @@ interface Props {
 }
 
 const displayMenu = (getMenu: Menu[]) => {
-	// let count = 0;
-
 	if (getMenu.length === 0) return <div>No items on the Menu currently</div>;
 	else {
 		return getMenu.map((item) => {
-			// let position = 'left';
-			// if (count % 3 === 1) position = 'left';
-			// else if (count % 3 === 2) position = 'left';
-			// count++;
 			return (
 				<div className="itemContainer" style={{ float: 'left' }}>
 					<h4>{item.name}</h4>
