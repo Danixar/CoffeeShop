@@ -9,7 +9,6 @@
 	<body>
 		<div class="container">
 			<section id="center">
-				<!-- <fieldset> -->
 				<h3>Register</h3>
 				<form action="/register" method="POST">
 					<div>
@@ -35,37 +34,9 @@
 					</div>
 					<button type="submit" id="register">Register</button>
 				</form>
-				<!-- </fieldset> -->
 				<a href="/">Cancel</a> <br />
 				<a href="/login">Login</a>
 			</section>
 		</div>
-
-		<!-- <script type="text/javascript">
-			function register() {
-				let first_name = document.getElementById('first_name').value;
-				let last_name = document.getElementById('last_name').value;
-				let email = document.getElementById('email').value;
-				let password = document.getElementById('password').value;
-
-				if (first_name && last_name && email && password) {
-					let httprequest = new XMLHttpRequest();
-					httprequest.addEventListener('load', () => {
-						if (httpRequest.readyState == 4 && httpRequest.status == 200) {
-						}
-					});
-
-					let url = '/register';
-					let params = `first_name=${first_name}&last_name=${last_name}&email=${email}&password=${password}`;
-					httpRequest.open('POST', url, true);
-					httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-					httpRequest.send(params);
-				} else {
-					alert('Missing Input Parameters!');
-				}
-			}
-
-			document.getElementById('register').addEventListener('click', register);
-		</script> -->
 	</body>
 </html>

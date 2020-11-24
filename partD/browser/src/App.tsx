@@ -68,10 +68,10 @@ const App: React.FC = () => {
 						<Route path="/" exact>
 							<Landing getMenu={getMenu} />
 						</Route>
-						<Route path="/customers">
+						{/* <Route path="/customers">
 							{getLogin ? <Customers getMenu={getMenu} getToken={getToken} /> : <Lockout />}
 						</Route>
-						<Route path="/employees">{getLogin ? <Employees /> : <Lockout />}</Route>
+						<Route path="/employees">{getLogin ? <Employees /> : <Lockout />}</Route> */}
 						<Route path="/login">
 							<Login />
 						</Route>
