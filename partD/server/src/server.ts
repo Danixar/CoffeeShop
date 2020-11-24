@@ -63,27 +63,7 @@ const authenticate = async (token: string) => {
 };
 
 // // ######################################################################################################################################
-
-// // Main Page
-// app.get('/', (req, res) => {
-// 	console.log(token, auth_id, customer);
-// 	if (auth_id !== null) res.redirect(`/?token=${token}`);
-// 	res.sendFile(path.join(__dirname, 'pages', 'index.html'));
-// });
-// app.get('/main', (req, res) => {
-// 	if (auth_id !== null) res.redirect(`/?token=${token}`);
-// 	else res.redirect(`/`);
-// });
-
-// // ######################################################################################################################################
 // // Login
-
-// // GET Login page
-// app.get('/login', (req, res) => {
-// 	console.log(token, auth_id, customer);
-// 	if (auth_id !== null) res.redirect(`/?token=${token}`);
-// 	else res.sendFile(path.join(__dirname, 'pages', 'login.html'));
-// });
 
 // POST Login Form
 app.post('/login', async (req, res) => {
@@ -111,10 +91,7 @@ app.post('/login', async (req, res) => {
 					},
 					'secretKey'
 				);
-
-				console.log(token);
-				console.log('hi');
-				res.status(202).json({ token: token });
+				res.status(202).json({ token });
 			}
 		} else res.status(400).send('Could not find user');
 
@@ -128,13 +105,6 @@ app.post('/login', async (req, res) => {
 
 // // ######################################################################################################################################
 // // Register
-
-// // GET registration page
-// app.get('/register', (req, res) => {
-// 	console.log(token, auth_id, customer);
-// 	if (auth_id !== null) res.redirect(`/?token=${token}`);
-// 	else res.sendFile(path.join(__dirname, 'pages', 'register.html'));
-// });
 
 // POST registration form
 app.post('/register', async (req, res) => {
@@ -166,15 +136,6 @@ app.post('/register', async (req, res) => {
 });
 
 // // ######################################################################################################################################
-// // Sign Out
-// app.get('/signout', (req, res) => {
-// 	token = null;
-// 	auth_id = null;
-// 	customer = null;
-// 	res.redirect('/login');
-// });
-
-// // ######################################################################################################################################
 // // Customers
 
 // GET menu items
@@ -187,23 +148,18 @@ app.get('/menu', async (req, res) => {
 	}
 });
 
-// // GET order page
-// app.get('/customerorders', (req, res) => {
-// 	if (auth_id === null) res.redirect(`/login?token=${token}`);
-// 	else if (auth_id !== null && !customer) {
-// 		res.redirect(`/employeerevoked?token=${token}`);
-// 	} else res.sendFile(path.join(__dirname, 'pages', 'customer-orders.html'));
-// });
-
-// app.get('/employeerevoked', async (req, res) => {
-// 	res.sendFile(path.join(__dirname, 'pages', 'employee-revoked.html'));
-// });
-
-// // GET past orders
-// app.get('/orders', (req, res) => {
-// 	if (auth_id === null) res.redirect(`/login?token=${token}`);
-// 	else red.sendFile(path.join(__dirname, 'pages', 'past-orders.html'));
-// });
+// GET all orders ready for pickup
+app.get('/readyorders', async (req, res) => {
+	try {
+		const allReadyOrders = await orders
+			.find({ cancelled: false, notified_customer: true })
+			.sort({ created_at: -1 });
+		res.status(200).json(allReadyOrders);
+	} catch (err) {
+		console.error(err);
+		res.status(500).send();
+	}
+});
 
 // POST new order
 app.post('/submitorder', async (req, res) => {
@@ -325,19 +281,6 @@ app.post('/cancelorder', async (req, res) => {
 // // ######################################################################################################################################
 // // Employees
 
-// // GET employee portal
-// app.get('/employeeportal', async (req, res) => {
-// 	console.log(token, auth_id, customer);
-// 	if (auth_id === null) res.redirect(`/login?token=${token}`);
-// 	else if (auth_id !== null && customer) {
-// 		res.redirect(`/customerrevoked?token=${token}`);
-// 	} else res.sendFile(path.join(__dirname, 'pages', 'employee-portal.html'));
-// });
-
-// app.get('/customerrevoked', async (req, res) => {
-// 	res.sendFile(path.join(__dirname, 'pages', 'customer-revoked.html'));
-// });
-
 // POST add menu item
 app.post('/addmenuitem', async (req, res) => {
 	const name = req.body.name;
@@ -349,7 +292,7 @@ app.post('/addmenuitem', async (req, res) => {
 
 	const user = await authenticate(req.token);
 
-	if (user) {
+	if (user && !user.customer) {
 		try {
 			const usersPastOrders = await orders.find({ customer_id: user._id });
 			const menuItem = new menu({
@@ -375,7 +318,7 @@ app.post('/deletemenuitem', async (req, res) => {
 	const menu_id = req.body.menu_id;
 	const user = await authenticate(req.token);
 
-	if (user && menu_id) {
+	if (user && menu_id && !user.customer) {
 		try {
 			await menu.deleteOne({ _id: menu_id });
 			res.status(200).send();
@@ -390,7 +333,7 @@ app.post('/deletemenuitem', async (req, res) => {
 app.get('/allopenorders', async (req, res) => {
 	const user = await authenticate(req.token);
 
-	if (user) {
+	if (user && !user.customer) {
 		try {
 			const allOpenOrders = await orders
 				.find({ cancelled: false, finished_at: { $gt: new Date() } })
@@ -407,7 +350,7 @@ app.get('/allopenorders', async (req, res) => {
 app.get('/allcompletedorders', async (req, res) => {
 	const user = await authenticate(req.token);
 
-	if (user) {
+	if (user && !user.customer) {
 		try {
 			const allCompletedOrders = await orders
 				.find({ cancelled: false, notified_customer: false, finished_at: { $lt: new Date() } })
@@ -425,7 +368,7 @@ app.post('/informcustomer', async (req, res) => {
 	const user = await authenticate(req.token);
 	const order_id = req.body.order_id;
 
-	if (user && order_id) {
+	if (user && order_id && !user.customer) {
 		try {
 			await orders.updateOne(
 				{ _id: order_id },
@@ -441,19 +384,6 @@ app.post('/informcustomer', async (req, res) => {
 			res.status(500).send();
 		}
 	} else res.status(400).send();
-});
-
-// GET all orders ready for pickup
-app.get('/readyorders', async (req, res) => {
-	try {
-		const allReadyOrders = await orders
-			.find({ cancelled: false, notified_customer: true })
-			.sort({ created_at: -1 });
-		res.status(200).json(allReadyOrders);
-	} catch (err) {
-		console.error(err);
-		res.status(500).send();
-	}
 });
 
 // ######################################################################################################################################

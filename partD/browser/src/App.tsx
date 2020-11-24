@@ -11,6 +11,7 @@ import { Employees } from './components/Employees';
 import { Login } from './components/Login';
 import { Register } from './components/Register';
 import { Lockout } from './components/Lockout';
+import { Signout } from './components/Signout';
 
 const App: React.FC = () => {
 	const [getToken, setToken] = useState<string | null>(null);
@@ -68,15 +69,19 @@ const App: React.FC = () => {
 						<Route path="/" exact>
 							<Landing getMenu={getMenu} />
 						</Route>
-						{/* <Route path="/customers">
+						<Route path="/customers">
 							{getLogin ? <Customers getMenu={getMenu} getToken={getToken} /> : <Lockout />}
 						</Route>
-						<Route path="/employees">{getLogin ? <Employees /> : <Lockout />}</Route> */}
+						<Route path="/employees">{getLogin ? <Employees /> : <Lockout />}</Route>
 						<Route path="/login">
-							<Login setToken={setToken} />
+							{!getLogin ? (
+								<Login setToken={setToken} />
+							) : (
+								<Signout setToken={setToken} setLogin={setLogin} />
+							)}
 						</Route>
 						<Route path="/register">
-							<Register />
+							{!getLogin ? <Register /> : <Signout setToken={setToken} setLogin={setLogin} />}
 						</Route>
 					</BrowserRouter>
 				</div>
