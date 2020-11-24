@@ -26,7 +26,6 @@ const App: React.FC = () => {
 	const [getMenu, setMenu] = useState<Menu[]>([]);
 
 	useEffect(() => {
-		console.log(getToken);
 		if (getToken) {
 			fetch('http://localhost:5000/login', {
 				method: 'GET',
@@ -86,7 +85,13 @@ const App: React.FC = () => {
 						<Route path="/customers">
 							{getLogin ? <Customers getMenu={getMenu} getToken={getToken} /> : <Lockout />}
 						</Route>
-						<Route path="/employees">{getLogin && !getLogin.customer ? <Employees /> : <Lockout />}</Route>
+						<Route path="/employees">
+							{getLogin && !getLogin.customer ? (
+								<Employees getMenu={getMenu} getToken={getToken} />
+							) : (
+								<Lockout />
+							)}
+						</Route>
 						<Route path="/login">
 							{!getLogin ? <Login setToken={setToken} /> : <Signout setToken={setToken} />}
 						</Route>

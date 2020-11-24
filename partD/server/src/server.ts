@@ -91,7 +91,7 @@ app.post('/login', async (req, res) => {
 							last_name: matchedUser.last_name,
 							customer: matchedUser.customer,
 						},
-						exp: Math.floor(Date.now() / 1000) + 60 * 60,
+						exp: Math.floor(Date.now() / 1000) + 60 * 60 * 3, // 3 hours
 					},
 					'secretKey'
 				);
@@ -174,9 +174,9 @@ app.get('/readyorders', async (req, res) => {
 // POST new order
 app.post('/submitorder', async (req, res) => {
 	const user = await authenticate(req.token);
-	const items = Object.values(req.body);
+	const items = Object.keys(req.body);
 
-	if (user && items) {
+	if (user && items && items.length > 0) {
 		try {
 			// Get the items in the order
 			let timeRequired = 0;
@@ -239,7 +239,7 @@ app.get('/getorders', async (req, res) => {
 
 	if (user) {
 		try {
-			const usersPastOrders = await orders.find({ customer_id: user._id });
+			const usersPastOrders = await orders.find({ customer_id: user._id }).sort({ created_at: -1 });
 			res.status(200).json(usersPastOrders);
 		} catch (err) {
 			console.error(err);
