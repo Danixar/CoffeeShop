@@ -24,7 +24,7 @@ export const Login: React.FC<Props> = ({ setToken }) => {
 		})
 			.then((res) => res.json())
 			.then((res) => {
-				setToken(res);
+				setToken(res.token);
 				history.push('/');
 			})
 			.catch((err) => {

@@ -13,19 +13,33 @@ import { Register } from './components/Register';
 import { Lockout } from './components/Lockout';
 import { Signout } from './components/Signout';
 
+interface UserInfo {
+	user_id: string;
+	first_name: string;
+	last_name: string;
+	customer: boolean;
+}
+
 const App: React.FC = () => {
 	const [getToken, setToken] = useState<string | null>(null);
-	const [getLogin, setLogin] = useState<boolean>(false);
+	const [getLogin, setLogin] = useState<UserInfo | null>(null);
 	const [getMenu, setMenu] = useState<Menu[]>([]);
 
 	useEffect(() => {
-		fetch('http://localhost:5000/menu')
-			.then((res) => res.json())
-			.then((res) => {
-				setMenu(res);
-			});
-		if (getToken) setLogin(true);
-		else setLogin(false);
+		console.log(getToken);
+		if (getToken) {
+			fetch('http://localhost:5000/login', {
+				method: 'GET',
+				headers: new Headers({
+					Authorization: `Bearer ${getToken}`,
+					'Content-Type': 'application/x-www-form-urlencoded',
+				}),
+			})
+				.then((res) => res.json())
+				.then((res) => {
+					setLogin(res);
+				});
+		} else setLogin(null);
 	}, [getToken]);
 
 	useEffect(() => {
@@ -72,17 +86,11 @@ const App: React.FC = () => {
 						<Route path="/customers">
 							{getLogin ? <Customers getMenu={getMenu} getToken={getToken} /> : <Lockout />}
 						</Route>
-						<Route path="/employees">{getLogin ? <Employees /> : <Lockout />}</Route>
+						<Route path="/employees">{getLogin && !getLogin.customer ? <Employees /> : <Lockout />}</Route>
 						<Route path="/login">
-							{!getLogin ? (
-								<Login setToken={setToken} />
-							) : (
-								<Signout setToken={setToken} setLogin={setLogin} />
-							)}
+							{!getLogin ? <Login setToken={setToken} /> : <Signout setToken={setToken} />}
 						</Route>
-						<Route path="/register">
-							{!getLogin ? <Register /> : <Signout setToken={setToken} setLogin={setLogin} />}
-						</Route>
+						<Route path="/register">{!getLogin ? <Register /> : <Signout setToken={setToken} />}</Route>
 					</BrowserRouter>
 				</div>
 			</header>

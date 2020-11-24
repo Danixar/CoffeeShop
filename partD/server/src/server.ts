@@ -58,8 +58,12 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
 };
 app.use(verifyToken);
 const authenticate = async (token: string) => {
-	const decoded: any = jwt.verify(token, 'secretKey');
-	return decoded?.user;
+	try {
+		const decoded: any = await jwt.verify(token, 'secretKey');
+		return decoded?.user;
+	} catch (err) {
+		console.error(err);
+	}
 };
 
 // // ######################################################################################################################################
@@ -101,6 +105,12 @@ app.post('/login', async (req, res) => {
 		res.status(500).send();
 		// res.sendFile(path.join(__dirname, 'pages', 'login.html'));
 	}
+});
+
+// GET Login Check
+app.get('/login', async (req, res) => {
+	const user = await authenticate(req.token);
+	res.status(200).json(user);
 });
 
 // // ######################################################################################################################################

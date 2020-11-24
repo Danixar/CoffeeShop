@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { Menu, Order } from './interfaces';
 
-interface itemOrder {
+interface ItemOrder {
 	item: Menu;
 	quantity: number;
 }
@@ -14,7 +14,7 @@ interface Props {
 
 export const Customers: React.FC<Props> = ({ getMenu, getToken }) => {
 	const [getPastOrders, setPastOrders] = useState<Order[]>([]);
-	const [getCurrentOrder, setCurrentOrder] = useState<itemOrder[] | null>([]);
+	const [getCurrentOrder, setCurrentOrder] = useState<ItemOrder[] | null>([]);
 
 	const displayMenu = (getMenu: Menu[]) => {
 		if (getMenu.length === 0) return <div>No items on the Menu currently</div>;
@@ -33,32 +33,32 @@ export const Customers: React.FC<Props> = ({ getMenu, getToken }) => {
 		}
 	};
 
-	const displayPastOrders = (getPastOrders: Order[]) => {
-		if (getPastOrders.length === 0) return <div>No previous orders</div>;
-		else {
-			return getPastOrders.map((order) => {
-				return (
-					<div className="itemContainer" style={{ float: 'left' }}>
-						<h4>
-							{order.items.map((item) => {
-								return `${item.quantity} ${item.name}`;
-							})}
-						</h4>
-						<h5>{order.finished_at < new Date() && !order.cancelled ? 'Finished' : 'In Progress'}</h5>
-						<h5>Created on {order.created_at}</h5>
-						{order.cancelled ? <h5>Cancelled</h5> : <button className="button1"> Cancel Order </button>}
-					</div>
-				);
-			});
-		}
-	};
+	// const displayPastOrders = (getPastOrders: Order[]) => {
+	// 	if (getPastOrders.length === 0) return <div>No previous orders</div>;
+	// 	else {
+	// 		return getPastOrders.map((order) => {
+	// 			return (
+	// 				<div className="itemContainer" style={{ float: 'left' }}>
+	// 					<h4>
+	// 						{order.items.map((item) => {
+	// 							return `${item.quantity} ${item.name}`;
+	// 						})}
+	// 					</h4>
+	// 					<h5>{order.finished_at < new Date() && !order.cancelled ? 'Finished' : 'In Progress'}</h5>
+	// 					<h5>Created on {order.created_at}</h5>
+	// 					{order.cancelled ? <h5>Cancelled</h5> : <button className="button1"> Cancel Order </button>}
+	// 				</div>
+	// 			);
+	// 		});
+	// 	}
+	// };
 
 	useEffect(() => {
 		if (getToken) {
 			fetch('http://localhost:5000/getorders', {
 				method: 'GET',
 				headers: new Headers({
-					Authorization: getToken,
+					Authorization: `Bearer ${getToken}`,
 					'Content-Type': 'application/x-www-form-urlencoded',
 				}),
 			})
@@ -88,7 +88,7 @@ export const Customers: React.FC<Props> = ({ getMenu, getToken }) => {
 			<div className="container">
 				<section>
 					<h3>Past Orders</h3>
-					{displayPastOrders(getPastOrders)}
+					{/* {displayPastOrders(getPastOrders)} */}
 				</section>
 			</div>
 			<div className="container">

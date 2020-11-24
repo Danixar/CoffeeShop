@@ -4,10 +4,9 @@ import { useHistory } from 'react-router-dom';
 
 interface Props {
 	setToken: React.Dispatch<React.SetStateAction<string | null>>;
-	setLogin: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const Signout: React.FC<Props> = ({ setLogin, setToken }) => {
+export const Signout: React.FC<Props> = ({ setToken }) => {
 	const history = useHistory();
 
 	return (
