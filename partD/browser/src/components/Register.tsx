@@ -10,12 +10,6 @@ export const Register: React.FC = () => {
 	const [isCustomer, setIsCustomer] = useState(true);
 
 	const register = () => {
-		console.log('Yo');
-		console.log(
-			`first_name=${getFirstName}&last_name=${getLastName}&email=${getEmail}&password=${getPassword}&user=${
-				isCustomer ? '1' : '0'
-			}`
-		);
 		fetch('http://localhost:5000/register', {
 			method: 'POST',
 			headers: { 'Content-type': 'application/x-www-form-urlencoded' },

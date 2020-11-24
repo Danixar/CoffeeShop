@@ -73,7 +73,7 @@ const App: React.FC = () => {
 						</Route>
 						<Route path="/employees">{getLogin ? <Employees /> : <Lockout />}</Route> */}
 						<Route path="/login">
-							<Login />
+							<Login setToken={setToken} />
 						</Route>
 						<Route path="/register">
 							<Register />

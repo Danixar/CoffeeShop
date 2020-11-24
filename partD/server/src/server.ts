@@ -95,10 +95,10 @@ app.post('/login', async (req, res) => {
 	if (!email || !password) res.status(400).send();
 
 	try {
-		const matchedUsers = await users.find({ email: email, customer: userType == 1 });
+		const matchedUser = await users.findOne({ email: email, customer: userType == 1 });
 
-		matchedUsers.every(async (matchedUser) => {
-			if (bcrypt.compare(password, matchedUser.password)) {
+		if (matchedUser) {
+			if (await bcrypt.compare(password, matchedUser.password)) {
 				const token = await jwt.sign(
 					{
 						user: {
@@ -112,11 +112,11 @@ app.post('/login', async (req, res) => {
 					'secretKey'
 				);
 
-				res.status(202).json(token);
-				return false;
+				console.log(token);
+				console.log('hi');
+				res.status(202).json({ token: token });
 			}
-		});
-		res.status(400).send('Could not find user');
+		} else res.status(400).send('Could not find user');
 
 		// res.redirect(`/?token=${resultTokens[resultTokens.length - 1].token}`);
 	} catch (err) {
@@ -279,8 +279,7 @@ app.get('/getorders', async (req, res) => {
 			console.error(err);
 			res.status(500).send();
 		}
-	}
-	res.status(400).send();
+	} else res.status(400).send();
 });
 
 // POST check past order
@@ -296,8 +295,7 @@ app.post('/checkorder', async (req, res) => {
 			console.error(err);
 			res.status(500).send();
 		}
-	}
-	res.status(400).send();
+	} else res.status(400).send();
 });
 
 // POST Cancel past order
@@ -321,8 +319,7 @@ app.post('/cancelorder', async (req, res) => {
 			console.error(err);
 			res.status(500).send();
 		}
-	}
-	res.status(400).send();
+	} else res.status(400).send();
 });
 
 // // ######################################################################################################################################
@@ -370,8 +367,7 @@ app.post('/addmenuitem', async (req, res) => {
 			console.error(err);
 			res.status(500).send();
 		}
-	}
-	res.status(400).send();
+	} else res.status(400).send();
 });
 
 // POST delete menu item
@@ -387,8 +383,7 @@ app.post('/deletemenuitem', async (req, res) => {
 			console.error(err);
 			res.status(500).send();
 		}
-	}
-	res.status(400).send();
+	} else res.status(400).send();
 });
 
 // GET all open orders
@@ -405,8 +400,7 @@ app.get('/allopenorders', async (req, res) => {
 			console.error(err);
 			res.status(500).send();
 		}
-	}
-	res.status(400).send();
+	} else res.status(400).send();
 });
 
 // GET all completed orders that the customer hasn't recieved yet
@@ -423,8 +417,7 @@ app.get('/allcompletedorders', async (req, res) => {
 			console.error(err);
 			res.status(500).send();
 		}
-	}
-	res.status(400).send();
+	} else res.status(400).send();
 });
 
 // POST order ready for pickup/notifying customer
@@ -447,8 +440,7 @@ app.post('/informcustomer', async (req, res) => {
 			console.error(err);
 			res.status(500).send();
 		}
-	}
-	res.status(400).send();
+	} else res.status(400).send();
 });
 
 // GET all orders ready for pickup
