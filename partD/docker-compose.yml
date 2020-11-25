@@ -11,15 +11,16 @@ services:
 
     node_server:
         build: ./server
+        restart: always
         depends_on:
             - mongo_database
         container_name: nodePartD
         ports:
             - '5000:5000'
-        # volumes:
-        #     - ./server:/usr/src/app
         networks:
             - mern-app
+        # links:
+        #     - dbPartD
 
     react_browser:
         build: ./browser
@@ -29,11 +30,8 @@ services:
         container_name: reactPartD
         ports:
             - '3000:3000'
-        # volumes:
-        #     - ./browser:/usr/src/app
         networks:
             - mern-app
-
 networks:
     mern-app:
         driver: bridge
