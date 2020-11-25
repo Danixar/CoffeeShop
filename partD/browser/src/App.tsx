@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import './style/style.css';
 import { BrowserRouter, Route, Link } from 'react-router-dom';
 
-import { Menu, Order, User } from './components/interfaces';
+import { Menu } from './components/interfaces';
 import { Landing } from './components/Landing';
 import { Customers } from './components/Customers';
 import { Employees } from './components/Employees';

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { isConstructorDeclaration } from 'typescript';
 
 import { Menu, Order } from './interfaces';
 
