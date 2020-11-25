@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "nodemon dist/server.js",
+		"start": "node dist/server.js",
 		"dev": "nodemon src/server.ts",
 		"build": "tsc -p ."
 	},
@@ -13,7 +13,6 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"nodemon": "^2.0.6",
 		"bcrypt": "^5.0.0",
 		"body-parser": "^1.19.0",
 		"cors": "^2.8.5",
@@ -22,6 +21,7 @@
 		"mongoose": "^5.10.15"
 	},
 	"devDependencies": {
+		"nodemon": "^2.0.6",
 		"@types/bcrypt": "^3.0.0",
 		"@types/body-parser": "^1.19.0",
 		"@types/cors": "^2.8.8",
