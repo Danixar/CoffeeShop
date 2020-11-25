@@ -13,7 +13,6 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 	const [getName, setName] = useState<string>('');
 	const [getSize, setSize] = useState<string>('');
 	const [getPrice, setPrice] = useState<number>(0);
-	const [getTimeRequired, setTimeRequired] = useState<number>(0);
 	const [getDescription, setDescription] = useState<string>('');
 
 	const [getOpenOrders, setOpenOrders] = useState<Order[]>([]);
@@ -85,11 +84,10 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 			let name = getName;
 			let size = getSize;
 			let price = getPrice;
-			let time_required = getTimeRequired;
 			let description = getDescription;
 			fetch('http://localhost:5000/addmenuitem', {
 				method: 'POST',
-				body: `name=${name}&size=${size}&price=${price}&time_required=${time_required}&description=${description}`,
+				body: `name=${name}&size=${size}&price=${price}&&description=${description}`,
 				headers: new Headers({
 					Authorization: `Bearer ${getToken}`,
 					'Content-Type': 'application/x-www-form-urlencoded',
@@ -169,7 +167,6 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 				.then((res) => {
 					if (res.status === 200) alert('Informed Customer!');
 					else alert('Customer could not be informed!');
-					// fetchReadyOrders();
 					fetchOpenOrders();
 				})
 				.catch((err) => {
@@ -232,15 +229,6 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 							placeholder="19.99"
 							value={getPrice}
 							onChange={(e) => setPrice(parseFloat(e.target.value))}
-						/>{' '}
-						<br />
-						<label>Minutes Required </label>
-						<input
-							type="number"
-							pattern="[0-9]*"
-							placeholder="5"
-							value={getTimeRequired}
-							onChange={(e) => setTimeRequired(parseInt(e.target.value))}
 						/>{' '}
 						<br />
 						<label>Description </label>

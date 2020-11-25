@@ -179,7 +179,6 @@ app.post('/submitorder', async (req, res) => {
 	if (user && items && items.length > 0) {
 		try {
 			// Get the items in the order
-			let timeRequired = 0;
 			let cost = 0;
 			const foundItems = await Promise.all(
 				items.map(async (item: any) => {
@@ -188,7 +187,6 @@ app.post('/submitorder', async (req, res) => {
 					const foundItem = await menu.findById(id);
 					if (foundItem) {
 						cost += foundItem.price * quantity;
-						if (foundItem.time_required > timeRequired) timeRequired = foundItem.time_required;
 						return {
 							item_id: foundItem._id,
 							name: foundItem.name,
@@ -199,10 +197,6 @@ app.post('/submitorder', async (req, res) => {
 					return null;
 				})
 			);
-
-			// Get Time required for order
-			let completionTime = new Date();
-			completionTime.setMinutes(completionTime.getMinutes() + timeRequired);
 
 			// Place the Order
 			const order = new orders({
@@ -221,7 +215,6 @@ app.post('/submitorder', async (req, res) => {
 				cost: cost,
 				cancelled: false,
 				created_at: new Date(),
-				finished_at: completionTime,
 				notified_customer: false,
 			});
 			await order.save();
@@ -296,9 +289,8 @@ app.post('/addmenuitem', async (req, res) => {
 	const name = req.body.name;
 	const size = req.body.size;
 	const price = req.body.price;
-	const time_required = req.body.time_required;
 	const description = req.body.description;
-	if (!name || !size || !price || !time_required || !description) res.status(400).send();
+	if (!name || !size || !price || !description) res.status(400).send();
 
 	const user = await authenticate(req.token);
 
@@ -309,7 +301,6 @@ app.post('/addmenuitem', async (req, res) => {
 				name: name,
 				size: size,
 				price: price,
-				time_required: time_required,
 				description: description,
 				removed: false,
 				date: new Date(),
@@ -348,27 +339,7 @@ app.get('/allopenorders', async (req, res) => {
 			const allOpenOrders = await orders
 				.find({ cancelled: false, notified_customer: false })
 				.sort({ created_at: -1 });
-			// const allOpenOrders = await orders
-			// 	.find({ cancelled: false, finished_at: { $gt: new Date() } })
-			// 	.sort({ created_at: -1 });
 			res.status(200).json(allOpenOrders);
-		} catch (err) {
-			console.error(err);
-			res.status(500).send();
-		}
-	} else res.status(400).send();
-});
-
-// GET all completed orders that the customer hasn't recieved yet
-app.get('/allcompletedorders', async (req, res) => {
-	const user = await authenticate(req.token);
-
-	if (user && !user.customer) {
-		try {
-			const allCompletedOrders = await orders
-				.find({ cancelled: false, notified_customer: false, finished_at: { $lt: new Date() } })
-				.sort({ created_at: -1 });
-			res.status(200).json(allCompletedOrders);
 		} catch (err) {
 			console.error(err);
 			res.status(500).send();
@@ -388,6 +359,7 @@ app.post('/informcustomer', async (req, res) => {
 				{
 					$set: {
 						notified_customer: true,
+						finished_at: new Date(),
 					},
 				}
 			);
