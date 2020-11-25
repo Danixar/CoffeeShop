@@ -338,7 +338,7 @@ app.get('/allopenorders', async (req, res) => {
 		try {
 			const allOpenOrders = await orders
 				.find({ cancelled: false, notified_customer: false })
-				.sort({ created_at: -1 });
+				.sort({ created_at: 1 });
 			res.status(200).json(allOpenOrders);
 		} catch (err) {
 			console.error(err);
