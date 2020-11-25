@@ -6,6 +6,9 @@ interface Props {
 	getMenu: Menu[];
 }
 
+/**
+ * Display menu items
+ */
 const displayMenu = (getMenu: Menu[]) => {
 	if (getMenu.length === 0) return <div>No items on the Menu currently</div>;
 	else {
@@ -22,6 +25,9 @@ const displayMenu = (getMenu: Menu[]) => {
 	}
 };
 
+/**
+ * Display ready orders
+ */
 const displayReadyOrders = (getReadyOrders: Order[]) => {
 	if (getReadyOrders.length === 0) return <div>No orders ready at the moment</div>;
 	else {
@@ -39,6 +45,9 @@ const displayReadyOrders = (getReadyOrders: Order[]) => {
 	}
 };
 
+/**
+ * Return landing page
+ */
 export const Landing: React.FC<Props> = ({ getMenu }) => {
 	const [getReadyOrders, setReadyOrders] = useState<Order[]>([]);
 

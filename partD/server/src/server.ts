@@ -345,6 +345,9 @@ app.get('/allopenorders', async (req, res) => {
 
 	if (user && !user.customer) {
 		try {
+			// const allOpenOrders = await orders
+			// 	.find({ cancelled: false, notified_customer: false })
+			// 	.sort({ created_at: -1 });
 			const allOpenOrders = await orders
 				.find({ cancelled: false, finished_at: { $gt: new Date() } })
 				.sort({ created_at: -1 });

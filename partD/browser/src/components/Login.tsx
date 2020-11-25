@@ -16,6 +16,9 @@ export const Login: React.FC<Props> = ({ setToken }) => {
 
 	const history = useHistory();
 
+	/**
+	 * Login as user and set token
+	 */
 	const login = () => {
 		fetch('http://localhost:5000/login', {
 			method: 'POST',
@@ -34,6 +37,9 @@ export const Login: React.FC<Props> = ({ setToken }) => {
 			});
 	};
 
+	/**
+	 * Return login page
+	 */
 	return (
 		<>
 			<div className="container">

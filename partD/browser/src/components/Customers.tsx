@@ -20,6 +20,9 @@ export const Customers: React.FC<Props> = ({ getMenu, getToken }) => {
 		})
 	);
 
+	/**
+	 * Display menu items
+	 */
 	const displayMenu = (getMenu: Menu[]) => {
 		if (getMenu.length === 0) return <div>No items on the Menu currently</div>;
 		else {
@@ -44,6 +47,9 @@ export const Customers: React.FC<Props> = ({ getMenu, getToken }) => {
 		}
 	};
 
+	/**
+	 * Alter order info
+	 */
 	const alterOrder = (id: string, value: string) => {
 		const order = getCurrentOrder;
 		setCurrentOrder(
@@ -54,6 +60,9 @@ export const Customers: React.FC<Props> = ({ getMenu, getToken }) => {
 		);
 	};
 
+	/**
+	 * submit new order with order info
+	 */
 	const submitNewOrder = () => {
 		if (getToken) {
 			let params = ``;
@@ -80,6 +89,9 @@ export const Customers: React.FC<Props> = ({ getMenu, getToken }) => {
 		}
 	};
 
+	/**
+	 * get all of user's past orders
+	 */
 	const fetchPastOrders = () => {
 		if (getToken) {
 			fetch('http://localhost:5000/getorders', {
@@ -96,6 +108,9 @@ export const Customers: React.FC<Props> = ({ getMenu, getToken }) => {
 		}
 	};
 
+	/**
+	 * Display user's past orders
+	 */
 	const displayPastOrders = (getPastOrders: Order[]) => {
 		if (getPastOrders.length === 0) return <div>No previous orders</div>;
 		else {
@@ -107,7 +122,7 @@ export const Customers: React.FC<Props> = ({ getMenu, getToken }) => {
 								return `${item.quantity} ${item.name} - `;
 							})}
 						</h4>
-						<h5>{order.finished_at < new Date() || order.cancelled ? 'Completed' : 'In Progress'}</h5>
+						<h5>{order.notified_customer || order.cancelled ? 'Completed' : 'In Progress'}</h5>
 						<h5>Created on {order.created_at}</h5>
 						{order.cancelled || order.finished_at > new Date() ? (
 							<h5>Done</h5>
@@ -123,6 +138,9 @@ export const Customers: React.FC<Props> = ({ getMenu, getToken }) => {
 		}
 	};
 
+	/**
+	 * Cancel selected order
+	 */
 	const cancelSelectedOrder = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		const id = event.currentTarget.id;
 		if (getToken) {
@@ -145,8 +163,14 @@ export const Customers: React.FC<Props> = ({ getMenu, getToken }) => {
 		}
 	};
 
+	/**
+	 * fetch user's past orders
+	 */
 	useEffect(() => fetchPastOrders(), []);
 
+	/**
+	 * returns customer portal
+	 */
 	return (
 		<>
 			{' '}

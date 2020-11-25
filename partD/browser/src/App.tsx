@@ -25,6 +25,9 @@ const App: React.FC = () => {
 	const [getLogin, setLogin] = useState<UserInfo | null>(null);
 	const [getMenu, setMenu] = useState<Menu[]>([]);
 
+	/**
+	 * checks for user's info whenever token is updated
+	 */
 	useEffect(() => {
 		if (getToken) {
 			fetch('http://localhost:5000/login', {
@@ -41,6 +44,9 @@ const App: React.FC = () => {
 		} else setLogin(null);
 	}, [getToken]);
 
+	/**
+	 * Get's menu items
+	 */
 	useEffect(() => {
 		fetch('http://localhost:5000/menu')
 			.then((res) => res.json())
@@ -49,6 +55,9 @@ const App: React.FC = () => {
 			});
 	}, []);
 
+	/**
+	 * The App!
+	 */
 	return (
 		<div className="App">
 			<header className="App-header">

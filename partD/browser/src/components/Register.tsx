@@ -11,6 +11,9 @@ export const Register: React.FC = () => {
 
 	const history = useHistory();
 
+	/**
+	 * Register as a user
+	 */
 	const register = () => {
 		fetch('http://localhost:5000/register', {
 			method: 'POST',
@@ -28,6 +31,9 @@ export const Register: React.FC = () => {
 			});
 	};
 
+	/**
+	 * Return registration page
+	 */
 	return (
 		<>
 			<div className="container">

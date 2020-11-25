@@ -19,6 +19,9 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 	const [getOpenOrders, setOpenOrders] = useState<Order[]>([]);
 	const [getReadyOrders, setReadyOrders] = useState<Order[]>([]);
 
+	/**
+	 * Display menu items
+	 */
 	const displayMenu = (getMenu: Menu[]) => {
 		if (getMenu.length === 0) return <div>No items on the Menu currently</div>;
 		else {
@@ -39,6 +42,9 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 		}
 	};
 
+	/**
+	 * remove menu item
+	 */
 	const removeMenuItem = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		const id = event.currentTarget.id;
 		if (getToken) {
@@ -61,6 +67,9 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 		}
 	};
 
+	/**
+	 * Get menu items
+	 */
 	const fetchMenu = () => {
 		fetch('http://localhost:5000/menu')
 			.then((res) => res.json())
@@ -69,6 +78,9 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 			});
 	};
 
+	/**
+	 * Add new menu item
+	 */
 	const addNewMenuItem = () => {
 		if (getToken) {
 			let name = getName;
@@ -95,6 +107,9 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 		}
 	};
 
+	/**
+	 * Get all open orders
+	 */
 	const fetchOpenOrders = () => {
 		if (getToken) {
 			fetch('http://localhost:5000/allopenorders', {
@@ -111,6 +126,9 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 		}
 	};
 
+	/**
+	 * Display all open orders
+	 */
 	const allOpenOrders = (getOpenOrders: Order[]) => {
 		if (getOpenOrders.length === 0) return <div>No open orders</div>;
 		else {
@@ -131,6 +149,9 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 		}
 	};
 
+	/**
+	 * Get all ready orders
+	 */
 	const fetchReadyOrders = () => {
 		if (getToken) {
 			fetch('http://localhost:5000/allcompletedorders', {
@@ -147,6 +168,9 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 		}
 	};
 
+	/**
+	 * Display all ready orders
+	 */
 	const allReadyOrders = (getReadyOrders: Order[]) => {
 		if (getReadyOrders.length === 0) return <div>No ready orders</div>;
 		else {
@@ -171,6 +195,9 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 		}
 	};
 
+	/**
+	 * Notify a customer their order is ready
+	 */
 	const notifyCustomer = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		const id = event.currentTarget.id;
 		if (getToken) {
@@ -194,11 +221,17 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 		}
 	};
 
+	/**
+	 * Fetch orders
+	 */
 	useEffect(() => {
 		fetchOpenOrders();
 		fetchReadyOrders();
 	}, []);
 
+	/**
+	 * Returns employee portal
+	 */
 	return (
 		<>
 			<div className="container">
