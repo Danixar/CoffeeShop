@@ -15,6 +15,11 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 	// 		return { item: item, quantity: 0 };
 	// 	})
 	// );
+	const [getName, setName] = useState<string>('');
+	const [getSize, setSize] = useState<string>('');
+	const [getPrice, setPrice] = useState<number>(0);
+	const [getTimeRequired, setTimeRequired] = useState<number>(0);
+	const [getDescription, setDescription] = useState<string>('');
 
 	const displayMenu = (getMenu: Menu[]) => {
 		if (getMenu.length === 0) return <div>No items on the Menu currently</div>;
@@ -66,6 +71,32 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 			});
 	};
 
+	const addNewMenuItem = () => {
+		if (getToken) {
+			let name = getName;
+			let size = getSize;
+			let price = getPrice;
+			let time_required = getTimeRequired;
+			let description = getDescription;
+			fetch('http://localhost:5000/addmenuitem', {
+				method: 'POST',
+				body: `name=${name}&size=${size}&price=${price}&time_required=${time_required}&description=${description}`,
+				headers: new Headers({
+					Authorization: `Bearer ${getToken}`,
+					'Content-Type': 'application/x-www-form-urlencoded',
+				}),
+			})
+				.then((res) => {
+					if (res.status === 201) alert('Added Item!');
+					else alert('Could not add item!');
+					fetchMenu();
+				})
+				.catch((err) => {
+					console.error(err);
+				});
+		}
+	};
+
 	return (
 		<>
 			<div className="container">
@@ -88,15 +119,48 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 					<h1>Add New Item</h1>
 					<fieldset>
 						<label>Name </label>
-						<input type="text" name="name" id="i1" value="Orange Mocha Frappucino" /> <br />
+						<input
+							type="text"
+							placeholder="Orange Mocha Frappucino"
+							value={getName}
+							onChange={(e) => setName(e.target.value)}
+						/>{' '}
+						<br />
 						<label>Size </label>
-						<input type="text" name="size" id="i2" value="Tio Grande" /> <br />
+						<input
+							type="text"
+							placeholder="Tio Grande"
+							value={getSize}
+							onChange={(e) => setSize(e.target.value)}
+						/>{' '}
+						<br />
 						<label>Price </label>
-						<input type="number" name="price" id="i3" value="19.99" /> <br />
-						<label>Time Required </label>
-						<input type="number" name="time" id="i4" value="5" /> <br />
+						<input
+							type="number"
+							pattern="[0-9]*"
+							placeholder="19.99"
+							value={getPrice}
+							onChange={(e) => setPrice(parseFloat(e.target.value))}
+						/>{' '}
+						<br />
+						<label>Minutes Required </label>
+						<input
+							type="number"
+							pattern="[0-9]*"
+							placeholder="5"
+							value={getTimeRequired}
+							onChange={(e) => setTimeRequired(parseInt(e.target.value))}
+						/>{' '}
+						<br />
 						<label>Description </label>
-						<textarea name="data" id="i5" cols={40} rows={2}>
+						<textarea
+							name="data"
+							id="i5"
+							cols={40}
+							rows={2}
+							value={getDescription}
+							onChange={(e) => setDescription(e.target.value)}
+						>
 							Caffeine
 						</textarea>
 					</fieldset>
@@ -105,7 +169,10 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 			<div className="container">
 				<nav className="sectionEnd">
 					<div className="container">
-						<button className="button1"> Add New Item to Menu </button>{' '}
+						<button className="button1" onClick={addNewMenuItem}>
+							{' '}
+							Add New Item to Menu{' '}
+						</button>{' '}
 					</div>
 				</nav>
 			</div>
