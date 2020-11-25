@@ -207,7 +207,7 @@ app.post('/submitorder', async (req, res) => {
 			// Place the Order
 			const order = new orders({
 				first_name: user.first_name,
-				last_name: user.second_name,
+				last_name: user.last_name,
 				customer_id: user._id,
 				items: foundItems.filter(Boolean).map((item) => {
 					if (item)

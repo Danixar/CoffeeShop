@@ -107,7 +107,7 @@ export const Customers: React.FC<Props> = ({ getMenu, getToken }) => {
 								return `${item.quantity} ${item.name} - `;
 							})}
 						</h4>
-						<h5>{order.finished_at > new Date() || order.cancelled ? 'Completed' : 'In Progress'}</h5>
+						<h5>{order.finished_at < new Date() || order.cancelled ? 'Completed' : 'In Progress'}</h5>
 						<h5>Created on {order.created_at}</h5>
 						{order.cancelled || order.finished_at > new Date() ? (
 							<h5>Done</h5>

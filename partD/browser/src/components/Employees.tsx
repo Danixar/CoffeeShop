@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { isConstructorDeclaration } from 'typescript';
 
 import { Menu, Order } from './interfaces';
 
@@ -9,17 +10,14 @@ interface Props {
 }
 
 export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
-	// const [getPastOrders, setPastOrders] = useState<Order[]>([]);
-	// const [getCurrentOrder, setCurrentOrder] = useState<ItemOrder[]>(
-	// 	getMenu.map((item) => {
-	// 		return { item: item, quantity: 0 };
-	// 	})
-	// );
 	const [getName, setName] = useState<string>('');
 	const [getSize, setSize] = useState<string>('');
 	const [getPrice, setPrice] = useState<number>(0);
 	const [getTimeRequired, setTimeRequired] = useState<number>(0);
 	const [getDescription, setDescription] = useState<string>('');
+
+	const [getOpenOrders, setOpenOrders] = useState<Order[]>([]);
+	const [getReadyOrders, setReadyOrders] = useState<Order[]>([]);
 
 	const displayMenu = (getMenu: Menu[]) => {
 		if (getMenu.length === 0) return <div>No items on the Menu currently</div>;
@@ -96,6 +94,110 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 				});
 		}
 	};
+
+	const fetchOpenOrders = () => {
+		if (getToken) {
+			fetch('http://localhost:5000/allopenorders', {
+				method: 'GET',
+				headers: new Headers({
+					Authorization: `Bearer ${getToken}`,
+					'Content-Type': 'application/x-www-form-urlencoded',
+				}),
+			})
+				.then((res) => res.json())
+				.then((res) => {
+					setOpenOrders(res);
+				});
+		}
+	};
+
+	const allOpenOrders = (getOpenOrders: Order[]) => {
+		if (getOpenOrders.length === 0) return <div>No open orders</div>;
+		else {
+			return getOpenOrders.map((order) => {
+				console.log(JSON.stringify(order));
+				return (
+					<div className="itemContainer" style={{ float: 'left' }}>
+						<h4>
+							{order.items.map((item) => {
+								return `${item.quantity} ${item.name} - `;
+							})}
+						</h4>
+						<h5>{`${order.first_name} ${order.last_name}`}</h5>
+						<h5>Created on {order.created_at}</h5>
+					</div>
+				);
+			});
+		}
+	};
+
+	const fetchReadyOrders = () => {
+		if (getToken) {
+			fetch('http://localhost:5000/allcompletedorders', {
+				method: 'GET',
+				headers: new Headers({
+					Authorization: `Bearer ${getToken}`,
+					'Content-Type': 'application/x-www-form-urlencoded',
+				}),
+			})
+				.then((res) => res.json())
+				.then((res) => {
+					setReadyOrders(res);
+				});
+		}
+	};
+
+	const allReadyOrders = (getReadyOrders: Order[]) => {
+		if (getReadyOrders.length === 0) return <div>No ready orders</div>;
+		else {
+			return getReadyOrders.map((order) => {
+				return (
+					<div className="itemContainer" style={{ float: 'left' }}>
+						<h4>
+							{order.items.map((item) => {
+								return `${item.quantity} ${item.name} - `;
+							})}
+						</h4>
+						<h5>{`${order.first_name} ${order.last_name}`}</h5>
+						<h5>Created on {order.created_at}</h5>
+
+						<button className="button1" id={order._id} onClick={(e) => notifyCustomer(e)}>
+							{' '}
+							Notify {`${order.first_name}`}{' '}
+						</button>
+					</div>
+				);
+			});
+		}
+	};
+
+	const notifyCustomer = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		const id = event.currentTarget.id;
+		if (getToken) {
+			fetch('http://localhost:5000/informcustomer', {
+				method: 'POST',
+				body: `order_id=${id}`,
+				headers: new Headers({
+					Authorization: `Bearer ${getToken}`,
+					'Content-Type': 'application/x-www-form-urlencoded',
+				}),
+			})
+				.then((res) => {
+					if (res.status === 200) alert('Informed Customer!');
+					else alert('Customer could not be informed!');
+					fetchReadyOrders();
+					fetchOpenOrders();
+				})
+				.catch((err) => {
+					console.error(err);
+				});
+		}
+	};
+
+	useEffect(() => {
+		fetchOpenOrders();
+		fetchReadyOrders();
+	}, []);
 
 	return (
 		<>
@@ -179,7 +281,7 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 			<div className="container">
 				<section>
 					<h1>All Open Orders</h1>
-					<p id="openorders">There are no open Orders</p>
+					{allOpenOrders(getOpenOrders)}
 				</section>
 			</div>
 			<div className="container">
@@ -192,13 +294,13 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 			<div className="container">
 				<section>
 					<h1>All Ready Orders</h1>
-					<p id="readyorders">There are no ready Orders</p>
+					{allReadyOrders(getReadyOrders)}
 				</section>
 			</div>
 			<div className="container">
 				<nav className="sectionEnd">
 					<div className="container">
-						<button className="button1"> Inform Selected Customers their Orders are Ready </button>{' '}
+						<br />
 					</div>
 				</nav>
 			</div>
