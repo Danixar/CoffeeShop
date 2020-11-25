@@ -3,6 +3,7 @@ services:
     mysql_a:
         build: ./mysql_docker
         container_name: dbPartA
+        restart: always
         ports:
             - '3306:3306'
         environment:
@@ -11,6 +12,7 @@ services:
 
     node_a:
         build: .
+        restart: always
         depends_on:
             - mysql_a
         container_name: nodePartA
