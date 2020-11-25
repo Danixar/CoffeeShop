@@ -10,11 +10,11 @@ services:
             MYSQL_DATABASE: coffeeShopPartA
 
     node_a:
-        build: ./node_docker
+        build: .
         depends_on:
             - mysql_a
         container_name: nodePartA
         ports:
             - '80:8080'
-        volumes:
-            - .:/usr/src/app
+        # volumes:
+        #     - .:/usr/src/app
