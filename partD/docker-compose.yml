@@ -6,9 +6,6 @@ services:
         container_name: dbPartD
         ports:
             - '27017:27017'
-        environment:
-            MYSQL_ROOT_PASSWORD: admin
-            MYSQL_DATABASE: coffeeShopPartA
         networks:
             - mern-app
 
@@ -19,8 +16,8 @@ services:
         container_name: nodePartD
         ports:
             - '5000:5000'
-        volumes:
-            - ./server:/usr/src/app
+        # volumes:
+        #     - ./server:/usr/src/app
         networks:
             - mern-app
 
@@ -32,8 +29,8 @@ services:
         container_name: reactPartD
         ports:
             - '3000:3000'
-        volumes:
-            - ./browser:/usr/src/app
+        # volumes:
+        #     - ./browser:/usr/src/app
         networks:
             - mern-app
 
