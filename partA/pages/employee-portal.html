@@ -42,16 +42,6 @@
 
 			<br />
 
-			<!-- <nav class="sectionEnd">
-				<div class="container">
-					<ul>
-						<li>
-							<a href="#menu" onclick="deleteMenu()">Delete Entire Menu</a>
-						</li>
-					</ul>
-				</div>
-			</nav> -->
-
 			<section>
 				<h3>Add New Item</h3>
 				<fieldset>
@@ -61,8 +51,6 @@
 					<input type="text" name="size" id="i2" value="Tio Grande" /> <br />
 					<label for="price">Price </label>
 					<input type="number" name="price" id="i3" value="19.99" /> <br />
-					<label for="time">Time Required </label>
-					<input type="number" name="time" id="i4" value="5" /> <br />
 					<label for="description">Description </label> <br />
 					<textarea name="data" id="i5" cols="70" rows="5">Caffeine</textarea>
 				</fieldset>
@@ -81,11 +69,6 @@
 			<section>
 				<h3>All Open Orders</h3>
 				<p id="openorders">There are no open Orders</p>
-			</section>
-
-			<section>
-				<h3>All Ready Orders</h3>
-				<p id="readyorders">There are no ready Orders</p>
 			</section>
 
 			<nav class="sectionEnd">
@@ -170,28 +153,13 @@
 				}
 			}
 
-			// function deleteMenu() {
-			// 	let httpRequest = new XMLHttpRequest();
-			// 	httpRequest.addEventListener('load', () => {
-			// 		if (httpRequest.readyState == 4 && httpRequest.status == 200) {
-			// 			alert('Menu Deleted');
-			// 			getMenu();
-			// 		} else alert(httpRequest.responseText);
-			// 	});
-			// 	let url = '/deletemenu';
-			// 	httpRequest.open('POST', url, true);
-			// 	httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-			// 	httpRequest.send();
-			// }
-
 			function addItem() {
 				let name = document.getElementById('i1').value;
 				let size = document.getElementById('i2').value;
 				let price = document.getElementById('i3').value;
-				let time_required = document.getElementById('i4').value;
 				let description = document.getElementById('i5').value;
 
-				if (name && size && price && time_required && description) {
+				if (name && size && price && description) {
 					let httpRequest = new XMLHttpRequest();
 					httpRequest.addEventListener('load', () => {
 						if (httpRequest.readyState == 4 && httpRequest.status == 200) {
@@ -199,7 +167,7 @@
 							getMenu();
 						} else alert(httpRequest.responseText);
 					});
-					let params = `name=${name}&size=${size}&price=${price}&time_required=${time_required}&description=${description}`;
+					let params = `name=${name}&size=${size}&price=${price}&description=${description}`;
 					let url = '/addmenuitem';
 					httpRequest.open('POST', url, true);
 					httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
@@ -207,47 +175,8 @@
 				} else alert('Invalid Input Parameters');
 			}
 
-			function getOpenOrders() {
-				let httpRequest = new XMLHttpRequest();
-				httpRequest.addEventListener('load', () => {
-					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
-						let orders = JSON.parse(httpRequest.responseText);
-						let table = "<table border='1' id='order-table' >";
-						if (orders.length > 0) {
-							for (order in orders) {
-								table +=
-									'</td> <td>' +
-									`${orders[order].finished ? 'Completed' : 'In Progress'}` +
-									'<td> <td> ' +
-									`${orders[order].cancelled ? 'Cancelled' : ''}` +
-									'<td> <td> ' +
-									'Creation Time: ' +
-									orders[order].created +
-									'</td> <td>' +
-									'Cost: ' +
-									orders[order].cost +
-									'</td> <td>' +
-									orders[order].items +
-									'</td> </tr>';
-							}
-							table += '</table>';
-							document.getElementById('openorders').innerHTML = table;
-						} else {
-							document.getElementById('openorders').innerHTML = 'There are no open Orders';
-						}
-					} else {
-						console.log(httpRequest.responseText);
-						document.getElementById('openorders').innerHTML = 'Open Orders cannot be seen at this time.';
-					}
-				});
-				let url = '/allopenorders';
-				httpRequest.open('GET', url, true);
-				httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-				httpRequest.send();
-			}
-
 			readyItems = [];
-			function getReadyorders() {
+			function getOpenOrders() {
 				readyItems = [];
 				let httpRequest = new XMLHttpRequest();
 				httpRequest.addEventListener('load', () => {
@@ -275,16 +204,16 @@
 									'</td> </tr>';
 							}
 							table += '</table>';
-							document.getElementById('readyorders').innerHTML = table;
+							document.getElementById('openorders').innerHTML = table;
 						} else {
-							document.getElementById('readyorders').innerHTML = 'There are no ready Orders';
+							document.getElementById('openorders').innerHTML = 'There are no ready Orders';
 						}
 					} else {
 						console.log(httpRequest.responseText);
-						document.getElementById('readyorders').innerHTML = 'Ready Orders cannot be seen at this time.';
+						document.getElementById('openorders').innerHTML = 'Ready Orders cannot be seen at this time.';
 					}
 				});
-				let url = '/allcompletedorders';
+				let url = '/allopenorders';
 				httpRequest.open('GET', url, true);
 				httpRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 				httpRequest.send();
@@ -295,6 +224,7 @@
 				httpRequest.addEventListener('load', () => {
 					if (httpRequest.readyState == 4 && httpRequest.status == 200) {
 						alert('Customers Informed');
+						getOpenOrders();
 					} else alert(httpRequest.responseText);
 				});
 				for (item in readyItems) {
@@ -310,7 +240,6 @@
 
 			getMenu();
 			getOpenOrders();
-			getReadyorders();
 		</script>
 	</body>
 </html>

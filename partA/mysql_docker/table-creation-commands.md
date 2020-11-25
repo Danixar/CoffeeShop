@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS menu_items(
      name VARCHAR(50) NOT NULL,
      size VARCHAR(50) NOT NULL,
      price DECIMAL(15,2) NOT NULL,
-     time_required int NOT NULL,
      description VARCHAR(1000),
      removed BOOLEAN default 0,
      PRIMARY KEY (menu_id)
@@ -57,7 +56,7 @@ CREATE TABLE IF NOT EXISTS orders(
      customer_id int NOT NULL,
      cancelled BOOLEAN default 0,
      created_at TIMESTAMP NULL,
-     completed_at TIMESTAMP NULL,
+     completed Boolean default 0,
      PRIMARY KEY (order_id)
      );
 ```

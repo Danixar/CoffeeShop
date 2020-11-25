@@ -118,7 +118,6 @@
 					} else alert(httpRequest.responseText);
 				});
 				for (item in orderItems) {
-					// console.log(document.getElementById(`order_${orderItems[item]}`));
 					if (document.getElementById(`order_${orderItems[item]}`).checked == true) {
 						params = `order_id=${orderItems[item]}`;
 						let url = '/cancelorder';

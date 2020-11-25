@@ -33,7 +33,6 @@ const setupTables = async () => {
             name VARCHAR(50) NOT NULL,
             size VARCHAR(50) NOT NULL,
             price DECIMAL(15,2) NOT NULL,
-            time_required int NOT NULL,
             description VARCHAR(1000),
             removed BOOLEAN default 0,
             PRIMARY KEY (menu_id)
@@ -61,7 +60,7 @@ const setupTables = async () => {
             customer_id int NOT NULL,
             cancelled BOOLEAN default 0,
             created_at TIMESTAMP NULL,
-            completed_at TIMESTAMP NULL,
+            completed BOOLEAN default 0,
             PRIMARY KEY (order_id)
             );`);
 	query(`CREATE TABLE IF NOT EXISTS ordered_items(
@@ -237,6 +236,18 @@ app.get('/menu', async (req, res) => {
 	}
 });
 
+// GET all orders ready for pickup
+app.get('/ordersready', async (req, res) => {
+	try {
+		await query(`DELETE FROM ready_orders WHERE HOUR(now()) != HOUR(posted)`);
+		const result = await query(`SELECT * FROM ready_orders;`);
+		res.send(result);
+	} catch (err) {
+		console.log(err);
+		res.status(500).send('Failed to get orders');
+	}
+});
+
 // GET order page
 app.get('/customerorders', (req, res) => {
 	console.log(token, auth_id, customer);
@@ -266,7 +277,7 @@ app.post('/submitorder', async (req, res) => {
 
 			const result = await query(`SELECT * FROM orders WHERE customer_id=${auth_id};`);
 
-			let timeMinutes = 0;
+			// let timeMinutes = 0;
 			await Promise.all(
 				items.map(async (item) => {
 					let itemName = item.split('_')[0];
@@ -276,17 +287,7 @@ app.post('/submitorder', async (req, res) => {
 							result[result.length - 1].order_id
 						}, ${quantity});`
 					);
-
-					const menu_item = await query(`SELECT * FROM menu_items WHERE menu_id=${itemName};`);
-					console.log(menu_item[0].time_required);
-					if (menu_item[0].time_required > 0) timeMinutes = menu_item[0].time_required;
 				})
-			);
-
-			await query(
-				`UPDATE orders SET completed_at=ADDTIME(now(), "${timeMinutes * 100}") WHERE order_id = ${
-					result[result.length - 1].order_id
-				} and customer_id=${auth_id};`
 			);
 
 			res.send('Completed');
@@ -312,14 +313,14 @@ const check = async (order_id) => {
 	);
 	const order = {
 		order_id: order_id,
-		finished: result[0].completed_at < new Date() || result[0].cancelled == 1,
+		finished: result[0].completed == 1 || result[0].cancelled == 1,
 		created: result[0].created_at,
 		cancelled: result[0].cancelled == 1,
 		cost: items
 			.map((item) => item.price * item.quantity)
 			.reduce((acc, cur) => acc * 1.15 + cur)
 			.toFixed(2),
-		items: items.map((item) => ' ' + item.quantity + ' ' + item.name),
+		items: items.map((item) => `${item.quantity} ${item.name} ${item.size}`),
 	};
 
 	return order;
@@ -331,7 +332,7 @@ app.get('/getorders', async (req, res) => {
 		try {
 			const sql = customer
 				? `SELECT * FROM orders WHERE customer_id = ${auth_id} ORDER BY created_at DESC;`
-				: `SELECT * FROM orders WHERE completed_at <= now() ORDER BY created_at ASC;`;
+				: `SELECT * FROM orders WHERE completed_at = 0 ORDER BY created_at ASC;`;
 			const result = await query(sql);
 			const items = await Promise.all(result.map(async (item) => await check(item.order_id)));
 
@@ -387,75 +388,19 @@ app.get('/customerrevoked', async (req, res) => {
 	res.sendFile(path.join(__dirname, 'pages', 'customer-revoked.html'));
 });
 
-// const createMenu = async () => {
-// 	const sql = `CREATE TABLE IF NOT EXISTS menu_items(
-//         menu_id int NOT NULL AUTO_INCREMENT,
-//         employee_id int,
-//         name VARCHAR(50) NOT NULL,
-//         size VARCHAR(50) NOT NULL,
-//         price NUMERIC NOT NULL,
-//         time_required TIME NOT NULL,
-//         description VARCHAR(50), c
-//         reated_at TIMESTAMP,
-//         PRIMARY KEY (menu_id)
-//         );`;
-// 	await query(sql);
-// };
-
-// // POST create menu
-// app.post('/createmenu', async (req, res) => {
-// 	if (auth_id && !customer) {
-// 		try {
-// 			const sql = `CREATE TABLE IF NOT EXISTS menu_items(
-//                     menu_id int NOT NULL AUTO_INCREMENT,
-//                     employee_id int,
-//                     name VARCHAR(50) NOT NULL,
-//                     size VARCHAR(50) NOT NULL,
-//                     price NUMERIC NOT NULL,
-//                     time_required TIME NOT NULL,
-//                     description VARCHAR(50), c
-//                     reated_at TIMESTAMP,
-//                     PRIMARY KEY (menu_id)
-//                     );`;
-// 			await query(sql);
-// 			res.send('Created Menu');
-// 		} catch (err) {
-// 			console.log(err);
-// 			res.status(500).send('Failed to create menu');
-// 		}
-// 	} else res.status(400).send('Improper access permissions');
-// });
-
-// // POST delete menu
-// app.post('/deletemenu', async (req, res) => {
-// 	if (auth_id && !customer) {
-// 		try {
-// 			await query(`DROP TABLE menu_items;`);
-// 			await query(`UPDATE orders SET cancelled = 1;`);
-// 			await query(`TRUNCATE TABLE ordered_items;`);
-// 			await createMenu(); // Create new empty menu
-// 			res.send('Deleted Menu');
-// 		} catch (err) {
-// 			console.log(err);
-// 			res.status(500).send('Failed to delete menu');
-// 		}
-// 	} else res.status(400).send('Improper access permissions');
-// });
-
 // POST add menu item
 app.post('/addmenuitem', async (req, res) => {
 	const name = req.body.name;
 	const size = req.body.size;
 	const price = req.body.price;
-	const time_required = req.body.time_required;
 	const description = req.body.description;
 
-	if (!name || !size || !price || !time_required || !description) res.status(400).send('Invalid Fields');
+	if (!name || !size || !price || !description) res.status(400).send('Invalid Fields');
 
 	if (auth_id && !customer) {
 		try {
 			await query(
-				`INSERT INTO menu_items(name, size, price, time_required, description) VALUES ('${name}', '${size}', ${price}, ${time_required}, '${description}');`
+				`INSERT INTO menu_items(name, size, price, description) VALUES ('${name}', '${size}', ${price}, '${description}');`
 			);
 			res.send(`Added menu item ${name} ${size}`);
 		} catch (err) {
@@ -487,23 +432,7 @@ app.get('/allopenorders', async (req, res) => {
 	if (auth_id && !customer) {
 		try {
 			const result = await query(
-				`SELECT * FROM orders WHERE completed_at > CURDATE() AND cancelled = 0 ORDER BY created_at DESC;`
-			);
-			const orders = await Promise.all(result.map(async (item) => await check(item.order_id)));
-			res.send(orders);
-		} catch (err) {
-			console.log(err);
-			res.status(500).send('Failed to get orders');
-		}
-	} else res.status(400).send('Improper access permissions');
-});
-
-// GET all completed orders
-app.get('/allcompletedorders', async (req, res) => {
-	if (auth_id && !customer) {
-		try {
-			const result = await query(
-				`SELECT * FROM orders WHERE completed_at <= CURDATE() AND cancelled = 0 ORDER BY created_at DESC;`
+				`SELECT * FROM orders WHERE completed = 0 AND cancelled = 0 ORDER BY created_at ASC;`
 			);
 			const orders = await Promise.all(result.map(async (item) => await check(item.order_id)));
 			res.send(orders);
@@ -525,22 +454,11 @@ app.post('/informcustomer', async (req, res) => {
 		await query(
 			`INSERT INTO ready_orders (customer_id, name, order_id, posted) VALUES (${customer_id}, "${name}", ${result[0].order_id}, now())`
 		);
+		await query(`UPDATE orders SET completed = 1 WHERE order_id=${order_id}`);
 		res.send('Customer Informed');
 	} catch (err) {
 		console.log(err);
 		res.status(500).send('Failed to inform customer');
-	}
-});
-
-// GET all orders ready for pickup
-app.get('/ordersready', async (req, res) => {
-	try {
-		await query(`DELETE FROM ready_orders WHERE HOUR(now()) != HOUR(posted)`);
-		const result = await query(`SELECT * FROM ready_orders;`);
-		res.send(result);
-	} catch (err) {
-		console.log(err);
-		res.status(500).send('Failed to get orders');
 	}
 });
 
