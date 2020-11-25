@@ -17,7 +17,6 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 	const [getDescription, setDescription] = useState<string>('');
 
 	const [getOpenOrders, setOpenOrders] = useState<Order[]>([]);
-	const [getReadyOrders, setReadyOrders] = useState<Order[]>([]);
 
 	/**
 	 * Display menu items
@@ -143,48 +142,6 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 						</h4>
 						<h5>{`${order.first_name} ${order.last_name}`}</h5>
 						<h5>Created on {order.created_at}</h5>
-					</div>
-				);
-			});
-		}
-	};
-
-	/**
-	 * Get all ready orders
-	 */
-	const fetchReadyOrders = () => {
-		if (getToken) {
-			fetch('http://localhost:5000/allcompletedorders', {
-				method: 'GET',
-				headers: new Headers({
-					Authorization: `Bearer ${getToken}`,
-					'Content-Type': 'application/x-www-form-urlencoded',
-				}),
-			})
-				.then((res) => res.json())
-				.then((res) => {
-					setReadyOrders(res);
-				});
-		}
-	};
-
-	/**
-	 * Display all ready orders
-	 */
-	const allReadyOrders = (getReadyOrders: Order[]) => {
-		if (getReadyOrders.length === 0) return <div>No ready orders</div>;
-		else {
-			return getReadyOrders.map((order) => {
-				return (
-					<div className="itemContainer" style={{ float: 'left' }}>
-						<h4>
-							{order.items.map((item) => {
-								return `${item.quantity} ${item.name} - `;
-							})}
-						</h4>
-						<h5>{`${order.first_name} ${order.last_name}`}</h5>
-						<h5>Created on {order.created_at}</h5>
-
 						<button className="button1" id={order._id} onClick={(e) => notifyCustomer(e)}>
 							{' '}
 							Notify {`${order.first_name}`}{' '}
@@ -212,7 +169,7 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 				.then((res) => {
 					if (res.status === 200) alert('Informed Customer!');
 					else alert('Customer could not be informed!');
-					fetchReadyOrders();
+					// fetchReadyOrders();
 					fetchOpenOrders();
 				})
 				.catch((err) => {
@@ -226,7 +183,6 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 	 */
 	useEffect(() => {
 		fetchOpenOrders();
-		fetchReadyOrders();
 	}, []);
 
 	/**
@@ -315,19 +271,6 @@ export const Employees: React.FC<Props> = ({ getToken, getMenu, setMenu }) => {
 				<section>
 					<h1>All Open Orders</h1>
 					{allOpenOrders(getOpenOrders)}
-				</section>
-			</div>
-			<div className="container">
-				<nav className="sectionEnd">
-					<div className="container">
-						<br />
-					</div>
-				</nav>
-			</div>
-			<div className="container">
-				<section>
-					<h1>All Ready Orders</h1>
-					{allReadyOrders(getReadyOrders)}
 				</section>
 			</div>
 			<div className="container">
