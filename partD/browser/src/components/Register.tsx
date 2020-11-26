@@ -104,7 +104,7 @@ export const Register: React.FC = () => {
 						</button>
 					</fieldset>
 					<br />
-					<a href="/login">Have an account already? Login</a>
+					{/* <a href="/login">Have an account already? Login</a> */}
 				</section>
 
 				<nav className="sectionEnd">

@@ -85,10 +85,6 @@ const App: React.FC = () => {
 								{' '}
 								<button className="button"> Login </button>{' '}
 							</Link>
-							<Link to="/register">
-								{' '}
-								<button className="button"> Register </button>{' '}
-							</Link>
 						</div>
 						<Route path="/" exact>
 							<Landing getMenu={getMenu} />
@@ -106,7 +102,6 @@ const App: React.FC = () => {
 						<Route path="/login">
 							{!getLogin ? <Login setToken={setToken} /> : <Signout setToken={setToken} />}
 						</Route>
-						<Route path="/register">{!getLogin ? <Register /> : <Signout setToken={setToken} />}</Route>
 					</BrowserRouter>
 				</div>
 			</header>
