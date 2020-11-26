@@ -11,6 +11,6 @@ PartD is the MERN version using React TypeScript, Node Typescript, and MongoDB f
 ## To run either:
 
 1. cd into the directory of the chosen part
-2. `docker-compose up -d -build`
+2. `docker-compose up -d -build` - if this doesn't work try adding the `--force-recreate` option or just using `docker-compose up`
 3. Access for partA's browser is through port 80 while partD's browser is through port 3000
 4. when done `docker-compose down`
