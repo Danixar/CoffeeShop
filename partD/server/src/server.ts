@@ -19,7 +19,8 @@ const HOST = '0.0.0.0';
 // ######################################################################################################################################
 
 // Database Assignment with table posts
-const container: string = 'dbPartD';
+// const container: string = 'dbPartD';
+const container: string = 'localhost';
 const database: string = 'coffeeShop';
 mongoose
 	.connect(`mongodb://${container}:27017/${database}`, { useNewUrlParser: true, useUnifiedTopology: true })

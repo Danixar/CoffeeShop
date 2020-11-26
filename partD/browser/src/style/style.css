@@ -34,13 +34,13 @@ body {
 .button {
 	background-color: white;
 	color: black;
-	border: 2px solid rgb(255, 165, 0);
+	border: 2px solid rgb(32, 178, 170);
 	transition-duration: 0.4s;
 	width: 250px;
 	height: 30px;
 }
 .button:hover {
-	background-color: rgb(255, 165, 0);
+	background-color: rgb(32, 178, 170);
 	color: white;
 	box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
 }
@@ -98,22 +98,30 @@ body {
 	background-color: rgb(32, 178, 170);
 	color: black;
 	padding: 15px;
-	font-size: 20px;
+	font-size: 26px;
+	position: sticky;
+	top: 0;
 }
 
 #navbar {
+	position: sticky;
+	top: 10%;
+	background-color: rgb(255, 165, 0);
+}
+
+#info {
 	text-align: center;
 }
-#navbar ul {
+#info ul {
 	padding: 0;
 	list-style: none;
 }
-#navbar li {
+#info li {
 	display: inline;
 	font-size: 18px;
 	padding-right: 15px;
 }
-#navbar a {
+#info a {
 	color: rgb(19, 19, 102);
 	text-decoration: none;
 }
@@ -167,7 +175,7 @@ body {
 }
 
 #main-footer {
-	background: rgb(190, 190, 190);
+	background: rgb(32, 178, 170);
 	color: rgb(4, 4, 88);
 	text-align: center;
 	padding: 20px;

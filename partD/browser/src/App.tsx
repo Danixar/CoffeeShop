@@ -66,28 +66,30 @@ const App: React.FC = () => {
 						<h1>Coffee Shop</h1>
 					</div>
 				</header>
-				<div id="navbar">
+				<div id="info">
 					<BrowserRouter>
-						<Link to="/">
-							{' '}
-							<button className="button"> Main </button>{' '}
-						</Link>
-						<Link to="/customers">
-							{' '}
-							<button className="button"> Customer Portal </button>{' '}
-						</Link>
-						<Link to="/employees">
-							{' '}
-							<button className="button"> Employee Portal </button>{' '}
-						</Link>
-						<Link to="/login">
-							{' '}
-							<button className="button"> Login </button>{' '}
-						</Link>
-						<Link to="/register">
-							{' '}
-							<button className="button"> Register </button>{' '}
-						</Link>
+						<div id="navbar">
+							<Link to="/">
+								{' '}
+								<button className="button"> Main </button>{' '}
+							</Link>
+							<Link to="/customers">
+								{' '}
+								<button className="button"> Customer Portal </button>{' '}
+							</Link>
+							<Link to="/employees">
+								{' '}
+								<button className="button"> Employee Portal </button>{' '}
+							</Link>
+							<Link to="/login">
+								{' '}
+								<button className="button"> Login </button>{' '}
+							</Link>
+							<Link to="/register">
+								{' '}
+								<button className="button"> Register </button>{' '}
+							</Link>
+						</div>
 						<Route path="/" exact>
 							<Landing getMenu={getMenu} />
 						</Route>
