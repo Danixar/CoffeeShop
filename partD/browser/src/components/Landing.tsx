@@ -72,9 +72,6 @@ export const Landing: React.FC<Props> = ({ getMenu }) => {
 						overpriced coffee with Italian and French names that appear sophisticated but really don't mean
 						anything special if you actually know the languages their words come from.
 					</p>
-					<br />
-					<h3>Orders Ready for Pickup</h3>
-					{displayReadyOrders(getReadyOrders)}
 				</section>
 			</div>
 
@@ -85,10 +82,8 @@ export const Landing: React.FC<Props> = ({ getMenu }) => {
 			</section>
 
 			<div className="container">
-				<section>
-					<h1>Menu</h1>
-					{displayMenu(getMenu)}
-				</section>
+				<h1>Orders Ready for Pickup</h1>
+				{displayReadyOrders(getReadyOrders)}
 			</div>
 
 			<section id="picture2">
@@ -96,6 +91,13 @@ export const Landing: React.FC<Props> = ({ getMenu }) => {
 					<h1>Made from only the finest coffee beans grown in the beautiful climate of North Canada</h1>
 				</div>
 			</section>
+
+			<div className="container">
+				<section>
+					<h1>Menu</h1>
+					{displayMenu(getMenu)}
+				</section>
+			</div>
 
 			<footer id="main-footer">
 				<p>Copyright &copy; 2020 Coffee Shop</p>
