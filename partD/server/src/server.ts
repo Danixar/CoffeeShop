@@ -39,9 +39,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // CORS Middleware
 app.use(cors());
 
-// // HTML files for testing post forms
-// app.use('/', express.static(path.join(__dirname, 'pages')));
-
 // Bad Authentication Middleware and Supporting function
 const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
 	const bearerHeader = req.headers['authorization']; // Authorization: Bearer <access_token>
