@@ -67,11 +67,7 @@ export const Landing: React.FC<Props> = ({ getMenu }) => {
 				<section id="about">
 					<h1> Welcome to Coffee Shop! </h1>
 					<h3>About Us</h3>
-					<p>
-						Here at Coffee Shop, we're not like other coffee shops - we pride ourselves on selling you
-						overpriced coffee with Italian and French names that appear sophisticated but really don't mean
-						anything special if you actually know the languages their words come from.
-					</p>
+					<p>Coffee Shop. Made for coffee drinkers by someone who only likes tea.</p>
 				</section>
 			</div>
 
