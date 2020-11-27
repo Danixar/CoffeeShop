@@ -24,7 +24,7 @@ export const Login: React.FC<Props> = ({ setToken }) => {
 	/**
 	 * Login as user and set token
 	 */
-	const login = () => {
+	const login = (getEmail: string, getPassword: string, isCustomer: boolean) => {
 		fetch('http://localhost:5000/login', {
 			method: 'POST',
 			headers: { 'Content-type': 'application/x-www-form-urlencoded' },
@@ -54,7 +54,8 @@ export const Login: React.FC<Props> = ({ setToken }) => {
 			}`,
 		})
 			.then(() => {
-				if (window.confirm('You succsefully registered!')) login();
+				if (window.confirm('You succsefully registered!'))
+					login(getEmailRegistration, getPasswordRegistration, CustomerRegistration);
 			})
 			.catch((err) => {
 				console.error(err);
@@ -111,7 +112,7 @@ export const Login: React.FC<Props> = ({ setToken }) => {
 								onChange={() => setIsCustomer(false)}
 							/>
 						</div>
-						<button className="button" onClick={login}>
+						<button className="button" onClick={(e) => login(getEmail, getPassword, isCustomer)}>
 							Login
 						</button>{' '}
 					</fieldset>
