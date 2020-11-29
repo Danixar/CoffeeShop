@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS menu_items(
      );
 ```
 
-`INSERT INTO menu_items(name, size, price, time_required, description) VALUES ();`
+`INSERT INTO menu_items(name, size, price, description) VALUES ();`
 
 ### EMPLOYEES
 

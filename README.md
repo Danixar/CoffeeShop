@@ -2,6 +2,8 @@
 
 CMPT 353 - November 2020
 
+PartD is the only interesting part of this - partA is extremely rudimentary
+
 ## Coffee Shop Full Stack App
 
 PartA is the version using incredibly basic HTML/JavaScript, Node Javascript, and MySQL for the client, server, and database, respectively.
