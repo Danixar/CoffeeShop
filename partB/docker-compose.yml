@@ -3,7 +3,7 @@ version: '3'
 services:
     mongo_database:
         build: ./database
-        container_name: dbPartD
+        container_name: dbPartB
         ports:
             - '27017:27017'
         networks:
@@ -14,7 +14,7 @@ services:
         restart: always
         depends_on:
             - mongo_database
-        container_name: nodePartD
+        container_name: nodePartB
         ports:
             - '5000:5000'
         networks:
@@ -27,7 +27,7 @@ services:
         stdin_open: true
         depends_on:
             - node_server
-        container_name: reactPartD
+        container_name: reactPartB
         ports:
             - '3000:3000'
         networks:
