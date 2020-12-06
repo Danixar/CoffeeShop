@@ -4,14 +4,14 @@ CMPT 353 - November 2020
 
 ## Coffee Shop Full Stack App
 
-PartA is the version using incredibly basic HTML/JavaScript, Node Javascript, and MySQL for the client, server, and database, respectively.
+**PartA** is the version using incredibly basic HTML/JavaScript, Node Javascript, and MySQL for the client, server, and database, respectively.
 
-PartB is the MERN version using React TypeScript, Node Typescript, and MongoDB for the client, server, and database, respectively.
+**PartB** is the MERN version using React TypeScript, Node Typescript, and MongoDB for the client, server, and database, respectively.
 
-PartC (In Progress) is the version utilizing Vue TypeScript, Deno TypeScript, and MongoDB for the client, server, and database,
+**PartC (In Progress)** is the version utilizing Vue TypeScript, Deno TypeScript, and MongoDB for the client, server, and database,
 respectively.
 
-PartD (In Progress) is the version utilizing Flask, Django, and MongoDB for the client, server, and database,
+**PartD (In Progress)** is the version utilizing Flask, Django, and MongoDB for the client, server, and database,
 respectively.
 
 ## To run either:
