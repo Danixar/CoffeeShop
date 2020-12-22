@@ -1,0 +1,194 @@
+/* Globals */
+body {
+	background: rgb(241, 241, 241);
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 16;
+	line-height: 1.6em;
+	margin: 0;
+}
+
+/* Classes */
+.container {
+	width: 80%;
+	margin: auto;
+	overflow: hidden;
+}
+.sectionEnd {
+	text-align: center;
+	background-color: rgb(32, 178, 170);
+	color: rgb(19, 19, 102);
+}
+.sectionEnd ul {
+	padding: 0;
+	list-style: none;
+}
+.sectionEnd#navbar li {
+	display: inline;
+	font-size: 18px;
+	padding-right: 15px;
+}
+.sectionEnd a {
+	color: rgb(19, 19, 102);
+	text-decoration: none;
+}
+.button {
+	background-color: white;
+	color: black;
+	border: 2px solid rgb(32, 178, 170);
+	transition-duration: 0.4s;
+	width: 250px;
+	height: 30px;
+}
+.button:hover {
+	background-color: rgb(32, 178, 170);
+	color: white;
+	box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
+}
+.button1 {
+	background-color: white;
+	color: black;
+	border: 2px solid rgb(255, 165, 0);
+	transition-duration: 0.4s;
+	padding: 10px;
+}
+.button1:hover {
+	background-color: rgb(255, 165, 0);
+	color: white;
+	box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
+}
+.itemContainer {
+	width: 33%;
+	height: 270px;
+	color: white;
+	border: 2px solid rgb(32, 178, 170);
+	background-color: rgb(255, 165, 0);
+	border-radius: 16px;
+	margin-top: 16px;
+	margin-bottom: 40px;
+}
+.itemContainer:hover {
+	background-color: rgb(32, 178, 170);
+	color: white;
+	box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
+}
+.buttonsContainer {
+	width: 33%;
+	height: 250px;
+	color: white;
+	border: 2px solid rgb(32, 178, 170);
+	background-color: rgb(255, 165, 0);
+	border-radius: 16px;
+	margin-top: 16px;
+	margin-bottom: 40px;
+}
+.buttonsContainer:hover {
+	background-color: rgb(32, 178, 170);
+	color: white;
+	box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
+}
+
+/* IDs */
+#menu-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+#main-header {
+	text-align: center;
+	background-color: rgb(32, 178, 170);
+	color: black;
+	padding: 15px;
+	font-size: 26px;
+	position: sticky;
+	top: 0;
+}
+
+#navbar {
+	position: sticky;
+	top: 10%;
+	background-color: rgb(255, 165, 0);
+}
+
+#info {
+	text-align: center;
+}
+#info ul {
+	padding: 0;
+	list-style: none;
+}
+#info li {
+	display: inline;
+	font-size: 18px;
+	padding-right: 15px;
+}
+#info a {
+	color: rgb(19, 19, 102);
+	text-decoration: none;
+}
+
+#about,
+#main {
+	float: left;
+	width: 100%;
+	padding: 15px 30px;
+	box-sizing: border-box;
+}
+#about p {
+	font-size: 20px;
+}
+
+#center {
+	max-width: 500px;
+	margin: auto;
+	float: center;
+	width: 100%;
+	padding: 15px 30px;
+	box-sizing: border-box;
+}
+
+#picture {
+	background-image: url('tundra.jpg');
+	background-position: center right;
+	min-height: 500px;
+	margin-bottom: 30px;
+	text-align: center;
+}
+#picture h1 {
+	color: black;
+	font-size: 50px;
+	line-height: 1.6em;
+	padding-top: 30px;
+}
+
+#picture2 {
+	background-image: url('tundra2.jpg');
+	background-position: center right;
+	min-height: 500px;
+	margin-bottom: 30px;
+	text-align: center;
+}
+#picture2 h1 {
+	color: white;
+	font-size: 50px;
+	line-height: 1.6em;
+	padding-top: 30px;
+}
+
+#main-footer {
+	background: rgb(32, 178, 170);
+	color: rgb(4, 4, 88);
+	text-align: center;
+	padding: 20px;
+	margin-top: 40px;
+}
+
+@media (max-width: 600px) {
+	#about {
+		width: 100%;
+		float: none;
+	}
+	#sidebar {
+		width: 100%;
+		float: none;
+	}
+}

@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+    mongo_database:
+        build: ./database
+        container_name: dbPartC
+        ports:
+            - '27017:27017'
+        networks:
+            - mern-app
+
+    node_server:
+        build: ./server
+        restart: always
+        depends_on:
+            - mongo_database
+        container_name: nodePartC
+        ports:
+            - '5000:5000'
+        networks:
+            - mern-app
+        # links:
+        #     - dbPartD
+
+    react_browser:
+        build: ./browser
+        stdin_open: true
+        depends_on:
+            - node_server
+        container_name: reactPartC
+        ports:
+            - '3000:3000'
+        networks:
+            - mern-app
+networks:
+    mern-app:
+        driver: bridge
