@@ -46,21 +46,19 @@ app.use(
 	})
 );
 
-// Bad Authentication Middleware
-app.use(async (ctx: Context, next) => {
-	const bearerHeader = ctx.request.headers.get('authorization');
-	if (bearerHeader) {
-		try {
-			console.log(bearerHeader);
-			const token = bearerHeader.split(' ')[1];
-			const decoded: any = await verify(token, 'secretKey', 'HS512');
-			return decoded?.user;
-		} catch (err) {
-			console.error(err);
-		}
-	}
-	next();
-});
+// // Bad Authentication Middleware
+// app.use(async (ctx: Context, next) => {
+// 	const bearerHeader = ctx.request.headers.get('authorization');
+// 	if (bearerHeader) {
+// 		try {
+// 			console.log(bearerHeader);
+// 			const token = bearerHeader.split(' ')[1];
+// 		} catch (err) {
+// 			console.error(err);
+// 		}
+// 	}
+// 	next();
+// });
 
 app.use(router.routes());
 app.use(router.allowedMethods());
