@@ -4,7 +4,7 @@
 // 11176620
 
 // Modules and packages
-import { Application } from 'https://deno.land/x/oak/mod.ts';
+import { Application, Context } from 'https://deno.land/x/oak/mod.ts';
 import router from './routes.ts';
 import { oakCors } from 'https://deno.land/x/cors/mod.ts';
 
@@ -38,9 +38,6 @@ const browserPort = 8000;
 // Create Server app
 const app = new Application();
 
-// // Body Parser Middleware
-// app.use(bodyParser.urlencoded({ extended: true }));
-
 // CORS Middleware
 app.use(
 	oakCors({
@@ -49,29 +46,21 @@ app.use(
 	})
 );
 
-// // Bad Authentication Middleware and Supporting function
-// const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
-// 	const bearerHeader = req.headers['authorization']; // Authorization: Bearer <access_token>
-// 	if (bearerHeader) {
-// 		try {
-// 			const token = bearerHeader.split(' ')[1];
-// 			req.token = token;
-// 		} catch (err) {
-// 			console.error(`Verification error for bearer header ${bearerHeader}`);
-// 			console.error(err);
-// 		}
-// 	}
-// 	next();
-// };
-// app.use(verifyToken);
-// const authenticate = async (token: string) => {
-// 	try {
-// 		const decoded: any = await jwt.verify(token, 'secretKey');
-// 		return decoded?.user;
-// 	} catch (err) {
-// 		console.error(err);
-// 	}
-// };
+// Bad Authentication Middleware
+app.use(async (ctx: Context, next) => {
+	const bearerHeader = ctx.request.headers.get('authorization');
+	if (bearerHeader) {
+		try {
+			console.log(bearerHeader);
+			const token = bearerHeader.split(' ')[1];
+			const decoded: any = await verify(token, 'secretKey', 'HS512');
+			return decoded?.user;
+		} catch (err) {
+			console.error(err);
+		}
+	}
+	next();
+});
 
 app.use(router.routes());
 app.use(router.allowedMethods());
