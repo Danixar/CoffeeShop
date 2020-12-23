@@ -1,5 +1,7 @@
 import { Router, Context } from 'https://deno.land/x/oak/mod.ts';
 import { decode, verify, create } from 'https://deno.land/x/djwt/mod.ts';
+import * as bcrypt from 'https://deno.land/x/bcrypt/mod.ts';
+import { MongoClient, Bson } from 'https://deno.land/x/mongo/mod.ts';
 
 const authenticate = async (ctx: Context) => {
 	try {
