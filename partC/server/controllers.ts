@@ -332,5 +332,3 @@ export const postInformCustomer = async ({ request, response }: { request: any; 
 		}
 	} else response.status = 400;
 };
-
-// ######################################################################################################################################
