@@ -1,15 +1,13 @@
 import { Router, Context } from 'https://deno.land/x/oak/mod.ts';
 import * as controllers from './controllers.ts';
+import { getLogin } from './controllers.ts';
 
 const router = new Router();
 
 // // // ######################################################################################################################################
 // // // Login
 
-// router.get('/login', async ({ req, res }) => {
-//     const user = await authenticate(ctx);
-// 	res.status(200).json(user);
-// });
+router.get('/login', getLogin);
 
 // // POST Login Form
 // app.post('/login', async (req, res) => {

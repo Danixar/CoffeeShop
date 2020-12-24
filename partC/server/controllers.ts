@@ -54,19 +54,21 @@ export const postLogin = async ({ req, res }: { req: any; res: any }) => {
 					},
 					'secretKey'
 				);
-				res.status(202).json({ token });
+				res.status = 202;
+				res.body = { token };
 			}
 		} else res.status(400).send('Could not find user');
 	} catch (err) {
 		console.log(err);
-		res.status(500).send();
+		res.status = 500;
 	}
 };
 
 // GET Login Check
 export const getLogin = async ({ req, res }: { req: any; res: any }) => {
 	const user = await authenticate(req);
-	res.status(200).json(user);
+	res.status = 200;
+	res.body = { user };
 };
 
 // ######################################################################################################################################
@@ -90,10 +92,10 @@ export const postRegister = async ({ req, res }: { req: any; res: any }) => {
 			customer: req.body.user == 1,
 			date: new Date(),
 		});
-		res.status(201).send();
+		res.status = 201;
 	} catch (err) {
 		console.log(err);
-		res.status(500).send();
+		res.status = 500;
 	}
 };
 
@@ -104,9 +106,10 @@ export const postRegister = async ({ req, res }: { req: any; res: any }) => {
 export const getMenu = async ({ req, res }: { req: any; res: any }) => {
 	try {
 		const result = await menu.find();
-		res.status(200).json(result);
+		res.status = 200;
+		res.body = { result };
 	} catch (err) {
-		res.status(500).send('Failed to get menu items');
+		res.status = 500;
 	}
 };
 
@@ -116,10 +119,11 @@ export const getReadyOrders = async ({ req, res }: { req: any; res: any }) => {
 		const allReadyOrders = await orders
 			.find({ cancelled: false, notified_customer: true })
 			.sort({ created_at: -1 });
-		res.status(200).json(allReadyOrders);
+		res.status = 200;
+		res.body = { allReadyOrders };
 	} catch (err) {
 		console.error(err);
-		res.status(500).send();
+		res.status = 500;
 	}
 };
 
@@ -169,12 +173,12 @@ export const postSubmitOrder = async ({ req, res }: { req: any; res: any }) => {
 				created_at: new Date(),
 				notified_customer: false,
 			});
-			res.status(201).send();
+			res.status = 201;
 		} catch (err) {
 			console.error(err);
-			res.status(500).send();
+			res.status = 500;
 		}
-	} else res.status(400).send();
+	} else res.status = 400;
 };
 
 // GET past orders of a customer
@@ -184,12 +188,13 @@ export const getOrders = async ({ req, res }: { req: any; res: any }) => {
 	if (user) {
 		try {
 			const usersPastOrders = await orders.find({ customer_id: user._id }).sort({ created_at: -1 });
-			res.status(200).json(usersPastOrders);
+			res.status = 200;
+			res.body = { usersPastOrders };
 		} catch (err) {
 			console.error(err);
-			res.status(500).send();
+			res.status = 500;
 		}
-	} else res.status(400).send();
+	} else res.status = 400;
 };
 
 // POST check past order
@@ -200,12 +205,15 @@ export const postCheckOrder = async ({ req, res }: { req: any; res: any }) => {
 	if (user && order_id) {
 		try {
 			const pastOrder = await orders.findOne({ _id: order_id, customer_id: user._id });
-			if (pastOrder) res.status(200).json(pastOrder);
+			if (pastOrder) {
+				res.status = 200;
+				res.body = { pastOrder };
+			}
 		} catch (err) {
 			console.error(err);
-			res.status(500).send();
+			res.status = 500;
 		}
-	} else res.status(400).send();
+	} else res.status = 400;
 };
 
 // POST Cancel past order
@@ -224,12 +232,12 @@ export const postCancelOrder = async ({ req, res }: { req: any; res: any }) => {
 					},
 				}
 			);
-			res.status(200).send();
+			res.status = 200;
 		} catch (err) {
 			console.error(err);
-			res.status(500).send();
+			res.status = 500;
 		}
-	} else res.status(400).send();
+	} else res.status = 400;
 };
 
 // ######################################################################################################################################
@@ -255,12 +263,12 @@ export const postAddMenuItem = async ({ req, res }: { req: any; res: any }) => {
 				removed: false,
 				date: new Date(),
 			});
-			res.status(201).send();
+			res.status = 201;
 		} catch (err) {
 			console.error(err);
-			res.status(500).send();
+			res.status = 500;
 		}
-	} else res.status(400).send();
+	} else res.status = 400;
 };
 
 // POST delete menu item
@@ -271,12 +279,12 @@ export const postDeleteMenuItem = async ({ req, res }: { req: any; res: any }) =
 	if (user && menu_id && !user.customer) {
 		try {
 			await menu.deleteOne({ _id: menu_id });
-			res.status(200).send();
+			res.status = 200;
 		} catch (err) {
 			console.error(err);
-			res.status(500).send();
+			res.status = 500;
 		}
-	} else res.status(400).send();
+	} else res.status = 400;
 };
 
 // GET all open orders
@@ -288,12 +296,13 @@ export const getAllOpenOrders = async ({ req, res }: { req: any; res: any }) => 
 			const allOpenOrders = await orders
 				.find({ cancelled: false, notified_customer: false })
 				.sort({ created_at: 1 });
-			res.status(200).json(allOpenOrders);
+			res.status = 200;
+			res.body = { allOpenOrders };
 		} catch (err) {
 			console.error(err);
-			res.status(500).send();
+			res.status = 500;
 		}
-	} else res.status(400).send();
+	} else res.status = 400;
 };
 
 // POST order ready for pickup/notifying customer
@@ -312,12 +321,12 @@ export const postInformCustomer = async ({ req, res }: { req: any; res: any }) =
 					},
 				}
 			);
-			res.status(200).json();
+			res.status = 200;
 		} catch (err) {
 			console.error(err);
-			res.status(500).send();
+			res.status = 500;
 		}
-	} else res.status(400).send();
+	} else res.status = 400;
 };
 
 // ######################################################################################################################################
