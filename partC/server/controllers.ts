@@ -34,33 +34,34 @@ export const postLogin = async ({ req, res }: { req: any; res: any }) => {
 	const password = req.body.password;
 	const userType = req.body.user;
 
-	if (!email || !password) res.status(400).send();
+	if (!email || !password) res.status = 400;
+	else {
+		try {
+			const matchedUser = await users.findOne({ email: email, customer: userType == 1 });
 
-	try {
-		const matchedUser = await users.findOne({ email: email, customer: userType == 1 });
-
-		if (matchedUser) {
-			if (await bcrypt.compare(password, matchedUser.password)) {
-				const token = await create(
-					{ alg: 'HS512', typ: 'JWT' },
-					{
-						user: {
-							_id: matchedUser._id,
-							first_name: matchedUser.first_name,
-							last_name: matchedUser.last_name,
-							customer: matchedUser.customer,
+			if (matchedUser) {
+				if (await bcrypt.compare(password, matchedUser.password)) {
+					const token = await create(
+						{ alg: 'HS512', typ: 'JWT' },
+						{
+							user: {
+								_id: matchedUser._id,
+								first_name: matchedUser.first_name,
+								last_name: matchedUser.last_name,
+								customer: matchedUser.customer,
+							},
+							exp: Math.floor(Date.now() / 1000) + 60 * 60 * 3, // 3 hours
 						},
-						exp: Math.floor(Date.now() / 1000) + 60 * 60 * 3, // 3 hours
-					},
-					'secretKey'
-				);
-				res.status = 202;
-				res.body = { token };
-			}
-		} else res.status(400).send('Could not find user');
-	} catch (err) {
-		console.log(err);
-		res.status = 500;
+						'secretKey'
+					);
+					res.status = 202;
+					res.body = { token };
+				}
+			} else res.status(400).send('Could not find user');
+		} catch (err) {
+			console.log(err);
+			res.status = 500;
+		}
 	}
 };
 
@@ -80,22 +81,23 @@ export const postRegister = async ({ req, res }: { req: any; res: any }) => {
 	const last_name = req.body.last_name;
 	const email = req.body.email;
 	const password = req.body.password;
-	if (!last_name || !email || !password) res.status(400).send('Invalid Input Parameters');
-
-	try {
-		const hashedPassword = await bcrypt.hash(password);
-		await users.insertOne({
-			first_name: first_name,
-			last_name: last_name,
-			email: email,
-			password: hashedPassword,
-			customer: req.body.user == 1,
-			date: new Date(),
-		});
-		res.status = 201;
-	} catch (err) {
-		console.log(err);
-		res.status = 500;
+	if (!last_name || !email || !password) res.status = 400;
+	else {
+		try {
+			const hashedPassword = await bcrypt.hash(password);
+			await users.insertOne({
+				first_name: first_name,
+				last_name: last_name,
+				email: email,
+				password: hashedPassword,
+				customer: req.body.user == 1,
+				date: new Date(),
+			});
+			res.status = 201;
+		} catch (err) {
+			console.log(err);
+			res.status = 500;
+		}
 	}
 };
 
@@ -249,26 +251,27 @@ export const postAddMenuItem = async ({ req, res }: { req: any; res: any }) => {
 	const size = req.body.size;
 	const price = req.body.price;
 	const description = req.body.description;
-	if (!name || !size || !price || !description) res.status(400).send();
+	if (!name || !size || !price || !description) res.status = 400;
+	else {
+		const user: UsersSchema | any = await authenticate(req);
 
-	const user: UsersSchema | any = await authenticate(req);
-
-	if (user && !user.customer) {
-		try {
-			await menu.insertOne({
-				name: name,
-				size: size,
-				price: price,
-				description: description,
-				removed: false,
-				date: new Date(),
-			});
-			res.status = 201;
-		} catch (err) {
-			console.error(err);
-			res.status = 500;
-		}
-	} else res.status = 400;
+		if (user && !user.customer) {
+			try {
+				await menu.insertOne({
+					name: name,
+					size: size,
+					price: price,
+					description: description,
+					removed: false,
+					date: new Date(),
+				});
+				res.status = 201;
+			} catch (err) {
+				console.error(err);
+				res.status = 500;
+			}
+		} else res.status = 400;
+	}
 };
 
 // POST delete menu item
