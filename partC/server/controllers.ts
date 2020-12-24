@@ -3,9 +3,9 @@ import { verify, create } from 'https://deno.land/x/djwt/mod.ts';
 import * as bcrypt from 'https://deno.land/x/bcrypt/mod.ts';
 import { menu, orders, users, UsersSchema } from './db.ts';
 
-const authenticate = async ({ req }: { req: any }) => {
+const authenticate = async (request: any) => {
 	try {
-		const bearerHeader = req.headers.get('authorization');
+		const bearerHeader = request.headers.get('authorization');
 		if (bearerHeader) {
 			console.log(bearerHeader);
 			const token = bearerHeader.split(' ')[1];
@@ -29,12 +29,12 @@ const authenticate = async ({ req }: { req: any }) => {
 // Login
 
 // POST Login Form
-export const postLogin = async ({ req, res }: { req: any; res: any }) => {
-	const email = req.body.email;
-	const password = req.body.password;
-	const userType = req.body.user;
+export const postLogin = async ({ request, response }: { request: any; response: any }) => {
+	const email = request.body.email;
+	const password = request.body.password;
+	const userType = request.body.user;
 
-	if (!email || !password) res.status = 400;
+	if (!email || !password) response.status = 400;
 	else {
 		try {
 			const matchedUser = await users.findOne({ email: email, customer: userType == 1 });
@@ -54,34 +54,35 @@ export const postLogin = async ({ req, res }: { req: any; res: any }) => {
 						},
 						'secretKey'
 					);
-					res.status = 202;
-					res.body = { token };
+					response.status = 202;
+					response.body = { token };
 				}
-			} else res.status(400).send('Could not find user');
+			} else response.status(400).send('Could not find user');
 		} catch (err) {
 			console.log(err);
-			res.status = 500;
+			response.status = 500;
 		}
 	}
 };
 
 // GET Login Check
-export const getLogin = async ({ req, res }: { req: any; res: any }) => {
-	const user = await authenticate(req);
-	res.status = 200;
-	res.body = { user };
+export const getLogin = async ({ request, response }: { request: any; response: any }) => {
+	const user = await authenticate(request);
+	response.status = 200;
+	response.body = { user };
 };
 
 // ######################################################################################################################################
 // Register
 
 // POST registration form
-export const postRegister = async ({ req, res }: { req: any; res: any }) => {
-	const first_name = req.body.first_name;
-	const last_name = req.body.last_name;
-	const email = req.body.email;
-	const password = req.body.password;
-	if (!last_name || !email || !password) res.status = 400;
+export const postRegister = async ({ request, response }: { request: any; response: any }) => {
+	const first_name = request.body.first_name;
+	const last_name = request.body.last_name;
+	const email = request.body.email;
+
+	const password = request.body.password;
+	if (!last_name || !email || !password) response.status = 400;
 	else {
 		try {
 			const hashedPassword = await bcrypt.hash(password);
@@ -90,13 +91,13 @@ export const postRegister = async ({ req, res }: { req: any; res: any }) => {
 				last_name: last_name,
 				email: email,
 				password: hashedPassword,
-				customer: req.body.user == 1,
+				customer: request.body.user == 1,
 				date: new Date(),
 			});
-			res.status = 201;
+			response.status = 201;
 		} catch (err) {
 			console.log(err);
-			res.status = 500;
+			response.status = 500;
 		}
 	}
 };
@@ -105,34 +106,34 @@ export const postRegister = async ({ req, res }: { req: any; res: any }) => {
 // Customers
 
 // GET menu items
-export const getMenu = async ({ req, res }: { req: any; res: any }) => {
+export const getMenu = async ({ request, response }: { request: any; response: any }) => {
 	try {
 		const result = await menu.find();
-		res.status = 200;
-		res.body = { result };
+		response.status = 200;
+		response.body = { result };
 	} catch (err) {
-		res.status = 500;
+		response.status = 500;
 	}
 };
 
 // GET all orders ready for pickup
-export const getReadyOrders = async ({ req, res }: { req: any; res: any }) => {
+export const getReadyOrders = async ({ request, response }: { request: any; response: any }) => {
 	try {
 		const allReadyOrders = await orders
 			.find({ cancelled: false, notified_customer: true })
 			.sort({ created_at: -1 });
-		res.status = 200;
-		res.body = { allReadyOrders };
+		response.status = 200;
+		response.body = { allReadyOrders };
 	} catch (err) {
 		console.error(err);
-		res.status = 500;
+		response.status = 500;
 	}
 };
 
 // POST new order
-export const postSubmitOrder = async ({ req, res }: { req: any; res: any }) => {
-	const user: UsersSchema | any = await authenticate(req);
-	const items = Object.keys(req.body);
+export const postSubmitOrder = async ({ request, response }: { request: any; response: any }) => {
+	const user: UsersSchema | any = await authenticate(request);
+	const items = Object.keys(request.body);
 
 	if (user && items && items.length > 0) {
 		try {
@@ -175,53 +176,53 @@ export const postSubmitOrder = async ({ req, res }: { req: any; res: any }) => {
 				created_at: new Date(),
 				notified_customer: false,
 			});
-			res.status = 201;
+			response.status = 201;
 		} catch (err) {
 			console.error(err);
-			res.status = 500;
+			response.status = 500;
 		}
-	} else res.status = 400;
+	} else response.status = 400;
 };
 
 // GET past orders of a customer
-export const getOrders = async ({ req, res }: { req: any; res: any }) => {
-	const user: UsersSchema | any = await authenticate(req);
+export const getOrders = async ({ request, response }: { request: any; response: any }) => {
+	const user: UsersSchema | any = await authenticate(request);
 
 	if (user) {
 		try {
 			const usersPastOrders = await orders.find({ customer_id: user._id }).sort({ created_at: -1 });
-			res.status = 200;
-			res.body = { usersPastOrders };
+			response.status = 200;
+			response.body = { usersPastOrders };
 		} catch (err) {
 			console.error(err);
-			res.status = 500;
+			response.status = 500;
 		}
-	} else res.status = 400;
+	} else response.status = 400;
 };
 
 // POST check past order
-export const postCheckOrder = async ({ req, res }: { req: any; res: any }) => {
-	const user: UsersSchema | any = await authenticate(req);
-	const order_id = req.body.order_id;
+export const postCheckOrder = async ({ request, response }: { request: any; response: any }) => {
+	const user: UsersSchema | any = await authenticate(request);
+	const order_id = request.body.order_id;
 
 	if (user && order_id) {
 		try {
 			const pastOrder = await orders.findOne({ _id: order_id, customer_id: user._id });
 			if (pastOrder) {
-				res.status = 200;
-				res.body = { pastOrder };
+				response.status = 200;
+				response.body = { pastOrder };
 			}
 		} catch (err) {
 			console.error(err);
-			res.status = 500;
+			response.status = 500;
 		}
-	} else res.status = 400;
+	} else response.status = 400;
 };
 
 // POST Cancel past order
-export const postCancelOrder = async ({ req, res }: { req: any; res: any }) => {
-	const user: UsersSchema | any = await authenticate(req);
-	const order_id = req.body.order_id;
+export const postCancelOrder = async ({ request, response }: { request: any; response: any }) => {
+	const user: UsersSchema | any = await authenticate(request);
+	const order_id = request.body.order_id;
 
 	if (user && order_id) {
 		try {
@@ -234,26 +235,26 @@ export const postCancelOrder = async ({ req, res }: { req: any; res: any }) => {
 					},
 				}
 			);
-			res.status = 200;
+			response.status = 200;
 		} catch (err) {
 			console.error(err);
-			res.status = 500;
+			response.status = 500;
 		}
-	} else res.status = 400;
+	} else response.status = 400;
 };
 
 // ######################################################################################################################################
 // Employees
 
 // POST add menu item
-export const postAddMenuItem = async ({ req, res }: { req: any; res: any }) => {
-	const name = req.body.name;
-	const size = req.body.size;
-	const price = req.body.price;
-	const description = req.body.description;
-	if (!name || !size || !price || !description) res.status = 400;
+export const postAddMenuItem = async ({ request, response }: { request: any; response: any }) => {
+	const name = request.body.name;
+	const size = request.body.size;
+	const price = request.body.price;
+	const description = request.body.description;
+	if (!name || !size || !price || !description) response.status = 400;
 	else {
-		const user: UsersSchema | any = await authenticate(req);
+		const user: UsersSchema | any = await authenticate(request);
 
 		if (user && !user.customer) {
 			try {
@@ -265,53 +266,53 @@ export const postAddMenuItem = async ({ req, res }: { req: any; res: any }) => {
 					removed: false,
 					date: new Date(),
 				});
-				res.status = 201;
+				response.status = 201;
 			} catch (err) {
 				console.error(err);
-				res.status = 500;
+				response.status = 500;
 			}
-		} else res.status = 400;
+		} else response.status = 400;
 	}
 };
 
 // POST delete menu item
-export const postDeleteMenuItem = async ({ req, res }: { req: any; res: any }) => {
-	const menu_id = req.body.menu_id;
-	const user: UsersSchema | any = await authenticate(req);
+export const postDeleteMenuItem = async ({ request, response }: { request: any; response: any }) => {
+	const menu_id = request.body.menu_id;
+	const user: UsersSchema | any = await authenticate(request);
 
 	if (user && menu_id && !user.customer) {
 		try {
 			await menu.deleteOne({ _id: menu_id });
-			res.status = 200;
+			response.status = 200;
 		} catch (err) {
 			console.error(err);
-			res.status = 500;
+			response.status = 500;
 		}
-	} else res.status = 400;
+	} else response.status = 400;
 };
 
 // GET all open orders
-export const getAllOpenOrders = async ({ req, res }: { req: any; res: any }) => {
-	const user: UsersSchema | any = await authenticate(req);
+export const getAllOpenOrders = async ({ request, response }: { request: any; response: any }) => {
+	const user: UsersSchema | any = await authenticate(request);
 
 	if (user && !user.customer) {
 		try {
 			const allOpenOrders = await orders
 				.find({ cancelled: false, notified_customer: false })
 				.sort({ created_at: 1 });
-			res.status = 200;
-			res.body = { allOpenOrders };
+			response.status = 200;
+			response.body = { allOpenOrders };
 		} catch (err) {
 			console.error(err);
-			res.status = 500;
+			response.status = 500;
 		}
-	} else res.status = 400;
+	} else response.status = 400;
 };
 
 // POST order ready for pickup/notifying customer
-export const postInformCustomer = async ({ req, res }: { req: any; res: any }) => {
-	const user: UsersSchema | any = await authenticate(req);
-	const order_id = req.body.order_id;
+export const postInformCustomer = async ({ request, response }: { request: any; response: any }) => {
+	const user: UsersSchema | any = await authenticate(request);
+	const order_id = request.body.order_id;
 
 	if (user && order_id && !user.customer) {
 		try {
@@ -324,12 +325,12 @@ export const postInformCustomer = async ({ req, res }: { req: any; res: any }) =
 					},
 				}
 			);
-			res.status = 200;
+			response.status = 200;
 		} catch (err) {
 			console.error(err);
-			res.status = 500;
+			response.status = 500;
 		}
-	} else res.status = 400;
+	} else response.status = 400;
 };
 
 // ######################################################################################################################################
