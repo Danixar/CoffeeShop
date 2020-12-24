@@ -1,8 +1,7 @@
 // deno-lint-ignore-file
-import { Router, Context } from 'https://deno.land/x/oak/mod.ts';
-import { decode, verify, create } from 'https://deno.land/x/djwt/mod.ts';
+import { verify, create } from 'https://deno.land/x/djwt/mod.ts';
 import * as bcrypt from 'https://deno.land/x/bcrypt/mod.ts';
-import { db, menu, orders, users, UsersSchema } from './db.ts';
+import { menu, orders, users, UsersSchema } from './db.ts';
 
 const authenticate = async ({ req }: { req: any }) => {
 	try {

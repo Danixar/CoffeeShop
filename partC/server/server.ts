@@ -4,7 +4,7 @@
 // 11176620
 
 // Modules and packages
-import { Application, Context } from 'https://deno.land/x/oak/mod.ts';
+import { Application } from 'https://deno.land/x/oak/mod.ts';
 import router from './routes.ts';
 import { oakCors } from 'https://deno.land/x/cors/mod.ts';
 

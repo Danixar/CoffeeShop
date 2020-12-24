@@ -1,7 +1,5 @@
 import { Router, Context } from 'https://deno.land/x/oak/mod.ts';
-import { decode, verify, create } from 'https://deno.land/x/djwt/mod.ts';
-import * as bcrypt from 'https://deno.land/x/bcrypt/mod.ts';
-import { db, menu, orders, users } from './db.ts';
+import * as controllers from './controllers.ts';
 
 const router = new Router();
 

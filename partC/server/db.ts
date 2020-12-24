@@ -60,4 +60,4 @@ const users = db.collection<UsersSchema>('users');
 const orders = db.collection<OrdersSchema>('orders');
 
 // Exporting
-export { db, menu, users, orders };
+export { menu, users, orders };
