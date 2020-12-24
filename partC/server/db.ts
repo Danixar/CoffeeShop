@@ -12,7 +12,7 @@ await client.connect(`mongodb://${container}:${databaseHost}`);
 console.log(`Connected to MongoDB Database ${database} on ${container}`);
 
 // Setting up schemas
-interface MenuSchema {
+export interface MenuSchema {
 	_id?: number;
 	name: string;
 	size: string;
@@ -23,7 +23,7 @@ interface MenuSchema {
 	date: Date;
 }
 
-interface UsersSchema {
+export interface UsersSchema {
 	_id?: number;
 	first_name: string;
 	last_name: string;
@@ -33,7 +33,7 @@ interface UsersSchema {
 	date: Date;
 }
 
-interface OrdersSchema {
+export interface OrdersSchema {
 	_id?: number;
 	first_name: string;
 	last_name: string;

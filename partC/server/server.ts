@@ -27,7 +27,7 @@ app.use(
 );
 
 // // Bad Authentication Middleware
-// app.use(async (ctx: Context, next) => {
+// app.use(async (ctx , next) => {
 // 	const bearerHeader = ctx.request.headers.get('authorization');
 // 	if (bearerHeader) {
 // 		try {

@@ -3,32 +3,15 @@ import { decode, verify, create } from 'https://deno.land/x/djwt/mod.ts';
 import * as bcrypt from 'https://deno.land/x/bcrypt/mod.ts';
 import { db, menu, orders, users } from './db.ts';
 
-const authenticate = async (ctx: Context) => {
-	try {
-		const bearerHeader = ctx.request.headers.get('authorization');
-		if (bearerHeader) {
-			console.log(bearerHeader);
-			const token = bearerHeader.split(' ')[1];
-			const decoded = await verify(token, 'secretKey', 'HS512');
-			return decoded?.user;
-		}
-	} catch (err) {
-		console.error(err);
-	}
-};
-// const authenticate = async (token: string) => {
-// 	try {
-// 		const decoded: any = await verify(token, 'secretKey', 'HS512');
-// 		return decoded?.user;
-// 	} catch (err) {
-// 		console.error(err);
-// 	}
-// };
-
 const router = new Router();
 
 // // // ######################################################################################################################################
 // // // Login
+
+// router.get('/login', async ({ req, res }) => {
+//     const user = await authenticate(ctx);
+// 	res.status(200).json(user);
+// });
 
 // // POST Login Form
 // app.post('/login', async (req, res) => {
@@ -68,7 +51,7 @@ const router = new Router();
 // 	}
 // });
 
-// // GET Login Check
+// GET Login Check
 // app.get('/login', async (req, res) => {
 // 	const user = await authenticate(req.token);
 // 	res.status(200).json(user);
