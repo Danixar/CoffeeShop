@@ -1,4 +1,4 @@
-import { MongoClient, Bson } from 'https://deno.land/x/mongo/mod.ts';
+import { MongoClient } from 'https://deno.land/x/mongo/mod.ts';
 
 // Basic Info
 const databaseHost = 27017;
