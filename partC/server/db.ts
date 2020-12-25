@@ -9,7 +9,6 @@ const database = 'coffeeShop';
 // Connecting to client
 const client = new MongoClient();
 await client.connect(`mongodb://${container}:${databaseHost}`);
-console.log(`Connected to MongoDB Database ${database} on ${container}`);
 
 // Setting up schemas
 export interface MenuSchema {
@@ -54,10 +53,11 @@ export interface OrdersSchema {
 }
 
 // Connecting to Database and adding schemas
-const db = client.database(database);
+const db = await client.database(database);
 const menu = db.collection<MenuSchema>('menu');
 const users = db.collection<UsersSchema>('users');
 const orders = db.collection<OrdersSchema>('orders');
 
 // Exporting
+console.log(`Connected to MongoDB Database ${database} on ${container}`);
 export { menu, users, orders };
