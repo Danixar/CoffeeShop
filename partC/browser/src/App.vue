@@ -32,6 +32,7 @@ body {
 	width: 80%;
 	margin: auto;
 	overflow: hidden;
+	text-align: center;
 }
 .button {
 	height: 30px;
