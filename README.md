@@ -13,8 +13,7 @@ Four implementations of a very basic coffee shop full stack application. Each ve
 **PartC (In Progress)** is the version utilizing Vue TypeScript, Deno TypeScript, and MongoDB for the client, server, and database,
 respectively.
 
-**PartD (In Progress)** is the version utilizing Flask, Django, and MongoDB for the client, server, and database,
-respectively.
+**PartD (In Progress)** is the version utilizing Flask, Django, and MongoDB.
 
 ## To run either:
 
