@@ -50,3 +50,33 @@ export default {
 	},
 };
 </script>
+
+<style>
+#picture {
+	background-image: url('~/images/tundra.jpg');
+	background-position: center right;
+	min-height: 500px;
+	margin-bottom: 30px;
+	text-align: center;
+}
+#picture h1 {
+	color: black;
+	font-size: 50px;
+	line-height: 1.6em;
+	padding-top: 30px;
+}
+
+#picture2 {
+	background-image: url('images/tundra2.jpg');
+	background-position: center right;
+	min-height: 500px;
+	margin-bottom: 30px;
+	text-align: center;
+}
+#picture2 h1 {
+	color: white;
+	font-size: 50px;
+	line-height: 1.6em;
+	padding-top: 30px;
+}
+</style>
