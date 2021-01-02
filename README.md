@@ -10,7 +10,7 @@ Four implementations of a very basic coffee shop full stack application. Each ve
 
 **PartB** is the MERN version using React TypeScript, Node Typescript, and MongoDB for the client, server, and database, respectively.
 
-**PartC (In Progress)** is the version utilizing Vue TypeScript, Deno TypeScript, and MongoDB for the client, server, and database, respectively.
+~~**PartC (In Progress)** is the version utilizing Vue TypeScript, Deno TypeScript, and MongoDB for the client, server, and database, respectively.~~ Get back to this sometime in the future when I want to practice Vue more
 
 ## To run either:
 
