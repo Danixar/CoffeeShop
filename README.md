@@ -2,7 +2,7 @@
 
 **November/December 2020**
 
-Four implementations of a very basic coffee shop full stack application. Each version explores new technologies as a method of learning.
+Implementations of a very basic coffee shop full stack application. Each version explores new technologies as a method of learning.
 
 ## Coffee Shop Full Stack App
 
