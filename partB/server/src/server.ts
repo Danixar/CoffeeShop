@@ -20,13 +20,12 @@ const HOST = '0.0.0.0';
 
 // Database Assignment with table posts
 const container: string = 'dbPartB';
-// const container: string = 'localhost';
 const database: string = 'coffeeShop';
 mongoose
 	.connect(`mongodb://${container}:27017/${database}`, { useNewUrlParser: true, useUnifiedTopology: true })
 	.then(() => console.log(`Connected to MongoDB Database ${database} on ${container}`))
-	.catch((err) => console.log(err));
-const conn: mongoose.Connection = mongoose.connection;
+	.catch((err) => console.error(err));
+const conn = mongoose.connection;
 conn.on('error', (err) => console.error(err));
 
 // ######################################################################################################################################
@@ -40,7 +39,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // CORS Middleware
 app.use(cors());
 
-// Bad Authentication Middleware and Supporting function
+// Authentication Middleware and Supporting function
 const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
 	const bearerHeader = req.headers['authorization']; // Authorization: Bearer <access_token>
 	if (bearerHeader) {
@@ -73,7 +72,6 @@ app.post('/login', async (req, res) => {
 	const password = req.body.password;
 	const userType = req.body.user;
 
-	// if (!email || !password) res.sendFile(path.join(__dirname, 'pages', 'login.html'));
 	if (!email || !password) res.status(400).send();
 
 	try {
@@ -97,11 +95,9 @@ app.post('/login', async (req, res) => {
 			}
 		} else res.status(400).send('Could not find user');
 
-		// res.redirect(`/?token=${resultTokens[resultTokens.length - 1].token}`);
 	} catch (err) {
 		console.log(err);
 		res.status(500).send();
-		// res.sendFile(path.join(__dirname, 'pages', 'login.html'));
 	}
 });
 
@@ -135,11 +131,9 @@ app.post('/register', async (req, res) => {
 
 		await user.save();
 		res.status(201).send();
-		// res.redirect('/login');
 	} catch (err) {
 		console.log(err);
 		res.status(500).send();
-		// res.sendFile(path.join(__dirname, 'pages', 'register.html'));
 	}
 });
 
